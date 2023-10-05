@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v3
       - name: Generate Firebase SDK config
         run: |
-          echo "${{ secrets.GCP_KEY }}" > /opt/gcp_key.json
+          echo "${{ secrets.GCP_KEY }}" >> /opt/gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=/opt/gcp_key.json
           npm install -g firebase-tools
           firebase use --add simple-budget-c19f0
