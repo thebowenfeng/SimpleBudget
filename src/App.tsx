@@ -9,5 +9,5 @@ export function App() {
 
   console.log(app)
 
-  return <h1>{process.env.NODE_ENV} abcdef</h1>;
+  return <h1>{process.env.NODE_ENV} 12345</h1>;
 }

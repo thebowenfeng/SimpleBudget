@@ -23,6 +23,7 @@ jobs:
           args: apps:sdkconfig web --json >> src/firebaseConfig.json
         env:
           GCP_SA_KEY: ${{ secrets.GCP_KEY }}
+          PROJECT_ID: simple-budget-c19f0
       - name: build project
         run: |
           npm ci
