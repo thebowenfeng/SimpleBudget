@@ -69,5 +69,4 @@ node_modules/
 .parcel-cache
 dist
 dist-build
-src/firebaseConfig.json
-package-lock.json
+src/firebaseConfig.jsonn
