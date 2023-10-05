@@ -1113,6 +1113,6 @@ let t=eR(e,t$);t.isInitialized()?t.getImmediate():/**
  *
  * @param app - The {@link @firebase/app#FirebaseApp} to use.
  */function(e,t={}){// Dependencies
-let n=eR(e,t$);if(n.isInitialized()){let e=n.getImmediate();if(ee(t,n.getOptions()))return e;throw tV.create("already-initialized"/* AnalyticsError.ALREADY_INITIALIZED */)}let r=n.initialize({options:t});return r}(e)}(n),console.log(n),/*#__PURE__*/(0,k.jsxs)("h1",{children:["production"," abcdef"]})},{}));//# sourceMappingURL=index.a799afa8.js.map
+let n=eR(e,t$);if(n.isInitialized()){let e=n.getImmediate();if(ee(t,n.getOptions()))return e;throw tV.create("already-initialized"/* AnalyticsError.ALREADY_INITIALIZED */)}let r=n.initialize({options:t});return r}(e)}(n),console.log(n),/*#__PURE__*/(0,k.jsxs)("h1",{children:["production"," 12345"]})},{}));//# sourceMappingURL=index.9702f95b.js.map
 
-//# sourceMappingURL=index.a799afa8.js.map
+//# sourceMappingURL=index.9702f95b.js.map
