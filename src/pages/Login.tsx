@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { Button, Input, InputRightElement, InputGroup, useToast } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
 import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
+import { isMobile } from 'react-device-detect'
 
 const RootWrapper = styled.div`
   height: 100vh;
@@ -15,8 +16,8 @@ const RootWrapper = styled.div`
 const LoginWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: 20px;
-  width: 35vw;
+  row-gap: ${isMobile ? '40px' : '20px'};
+  width: ${isMobile ? "75vw" : "35vw"};
   min-width: 500px;
   align-items: center;
   justify-content: center;
@@ -40,7 +41,6 @@ export default function Login() {
       description: description,
       status: type,
       duration: 3000,
-      position: 'top-right',
       isClosable: true
     })
   }
@@ -68,22 +68,31 @@ export default function Login() {
   return(
     <RootWrapper>
       <LoginWrapper>
-        <h1 style={{fontSize: "2em"}}>Login</h1>
-        <Input placeholder={"Email"} size={"lg"} ref={emailRef}/>
+        <h1 style={{fontSize: isMobile ? "5em" : "2em"}}>Login</h1>
+        <Input placeholder={"Email"} size={"lg"} ref={emailRef}
+               height={isMobile ? "80px" : 'var(--input-height)'}
+               sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}/>
         <InputGroup size='md'>
           <Input
             size={'lg'}
             type={show ? 'text' : 'password'}
             placeholder='Enter password'
             ref={pswdRef}
+            height={isMobile ? "80px" : 'var(--input-height)'}
+            sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}
           />
-          <InputRightElement width='4.5rem' top={'4px'}>
-            <Button h='2rem' size='sm' onClick={() => useShow((prev) => !prev)}>
+          <InputRightElement width='4.5rem' top={isMobile ? '20px' : '4px'}>
+            <Button h={isMobile ? '4rem' : '2rem'} size={isMobile ? 'lg' : 'sm'} onClick={() => useShow((prev) => !prev)}>
               {show ? 'Hide' : 'Show'}
             </Button>
           </InputRightElement>
         </InputGroup>
-        <Button size={"lg"} onClick={onLogin}>Login</Button>
+        <Button size={"lg"} onClick={onLogin}
+                sx={{
+                  height: isMobile ? "100px" : "var(--chakra-sizes-12)",
+                  width: isMobile ? "200px" : "var(--chakra-sizes-20)",
+                  fontSize: isMobile ? "3rem" : "var(--chakra-fontSizes-lg)"
+        }}>Login</Button>
       </LoginWrapper>
     </RootWrapper>
   )
