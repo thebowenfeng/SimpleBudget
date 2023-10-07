@@ -7,8 +7,15 @@ import { getAuth, signOut } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import GenericLoading from './pages/GenericLoading'
 import { isMobile } from 'react-device-detect'
+import NavBarDesktop from './components/NavBarDesktop'
+import { styled } from 'styled-components'
 
 type Page = "undefined" | "login" | "main"
+
+const RootWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`
 
 export function App() {
   const config = firebaseSdkConfig.result.sdkConfig
@@ -46,7 +53,12 @@ export function App() {
       <FirebaseContext.Provider value={app}>
         {page == "undefined" && <GenericLoading />}
         {page == "login" && <Login />}
-        {page == "main" && <h1>Main</h1>}
+        {(page != "login" && page != "undefined") &&
+          <RootWrapper>
+            <NavBarDesktop />
+            {page == "main" && <h1>Main</h1>}
+          </RootWrapper>
+        }
       </FirebaseContext.Provider>
     </ChakraProvider>
   );
