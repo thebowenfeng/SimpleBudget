@@ -2,10 +2,8 @@ import { keyframes, styled } from 'styled-components'
 import { ReactElement, useRef, useState } from 'react'
 import { Button, IconButton, Heading } from '@chakra-ui/react'
 import { Icon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
-import { HiWallet } from 'react-icons/hi2'
-import { AiFillBank } from 'react-icons/ai'
 import { BsFillBootstrapFill } from 'react-icons/bs'
-import { NavBarItem } from './config'
+import { NavBarItem, navBarItems } from './config'
 
 interface NavBarEntryProps {
   label: string,
@@ -33,17 +31,6 @@ const slideRight = keyframes`
     clip-path: inset(0 0 0 0);
   }
 `
-
-const navBarItems: NavBarItem[] = [
-  {
-    title: "Budget",
-    icon: <Icon as={HiWallet}/>
-  },
-  {
-    title: "Bank account",
-    icon: <Icon as={AiFillBank}/>
-  }
-]
 
 export default function NavBarDesktop() {
   const [expand, setExpand] = useState<boolean>(false)

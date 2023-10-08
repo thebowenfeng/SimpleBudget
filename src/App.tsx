@@ -9,8 +9,9 @@ import GenericLoading from './pages/GenericLoading'
 import { isMobile } from 'react-device-detect'
 import { styled } from 'styled-components'
 import { NBDesktop, NBMobile } from './components/NavBar'
+import Budget from './pages/Budget'
 
-type Page = "undefined" | "login" | "main"
+type Page = "undefined" | "login" | "budget"
 
 const RootWrapper = styled.div`
   display: flex;
@@ -37,7 +38,7 @@ export function App() {
             setPage("undefined")
           })
         }
-        setPage("main")
+        setPage("budget")
       } else {
         setPage("login")
       }
@@ -57,7 +58,7 @@ export function App() {
         {(page != "login" && page != "undefined") &&
           <RootWrapper>
             {!isMobile && <NBDesktop />}
-            {page == "main" && <h1>Main</h1>}
+            {page == "budget" && <Budget />}
             {isMobile && <NBMobile />}
           </RootWrapper>
         }

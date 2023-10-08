@@ -14,7 +14,7 @@ export const navBarItems: NavBarItem[] = [
     icon: <Icon as={HiWallet}/>
   },
   {
-    title: "Bank account",
+    title: "Bank Account",
     icon: <Icon as={AiFillBank}/>
   }
 ]
