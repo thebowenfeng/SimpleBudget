@@ -5,11 +5,7 @@ import { Icon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { HiWallet } from 'react-icons/hi2'
 import { AiFillBank } from 'react-icons/ai'
 import { BsFillBootstrapFill } from 'react-icons/bs'
-
-interface NavBarItem {
-  title: string,
-  icon: ReactElement
-}
+import { NavBarItem } from './config'
 
 interface NavBarEntryProps {
   label: string,
@@ -31,7 +27,7 @@ const RootWrapper = styled.div`
 
 const slideRight = keyframes`
   0% {
-    clip-path: inset(0 100% 0 0);
+    clip-path: inset(0 44% 0 0);
   }
   100% {
     clip-path: inset(0 0 0 0);

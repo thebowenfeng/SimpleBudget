@@ -7,14 +7,15 @@ import { getAuth, signOut } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import GenericLoading from './pages/GenericLoading'
 import { isMobile } from 'react-device-detect'
-import NavBarDesktop from './components/NavBarDesktop'
 import { styled } from 'styled-components'
+import { NBDesktop, NBMobile } from './components/NavBar'
 
 type Page = "undefined" | "login" | "main"
 
 const RootWrapper = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: ${isMobile ? 'column' : 'row'};
+  height: 100vh;
 `
 
 export function App() {
@@ -55,8 +56,9 @@ export function App() {
         {page == "login" && <Login />}
         {(page != "login" && page != "undefined") &&
           <RootWrapper>
-            <NavBarDesktop />
+            {!isMobile && <NBDesktop />}
             {page == "main" && <h1>Main</h1>}
+            {isMobile && <NBMobile />}
           </RootWrapper>
         }
       </FirebaseContext.Provider>
