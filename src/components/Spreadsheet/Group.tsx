@@ -54,10 +54,14 @@ export default function Group(props: Props) {
     switch (containerRef.current.style.maxHeight) {
       case '0px':
         containerRef.current.style.maxHeight = '1500px';
+        containerRef.current.style.visibility = 'visible'
         setIsFolded(false);
         break;
       case '1500px':
         containerRef.current.style.maxHeight = '0';
+        setTimeout(() => {
+          containerRef.current.style.visibility = 'hidden'
+        }, 1000)
         setIsFolded(true);
         break;
     }
@@ -78,7 +82,7 @@ export default function Group(props: Props) {
           </LabelContainer>
         </div>
       </RootContainer>
-      <ChildrenContainer ref={containerRef} style={{maxHeight: '1500px'}}>
+      <ChildrenContainer ref={containerRef} style={{maxHeight: '1500px', visibility: 'visible'}}>
         {props.children}
       </ChildrenContainer>
     </>

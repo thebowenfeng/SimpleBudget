@@ -18,7 +18,7 @@ const ViewContainer = styled.div`
   flex-direction: column;
   overflow-y: scroll;
   max-height: calc(100vh - 150px);
-  padding-bottom: 20px;
+  padding-bottom: 30px;
   scrollbar-gutter: stable;
 `
 
@@ -63,6 +63,17 @@ export default function SpreadsheetView() {
         </LabelContainer>
       </LabelHeader>
       <ViewContainer>
+        <Group title={"MyGroup1"} assigned={100} available={80}>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+          <h1 style={{fontSize: '5rem'}}>Test</h1>
+        </Group>
         <Group title={"MyGroup1"} assigned={100} available={80}>
           <h1 style={{fontSize: '5rem'}}>Test</h1>
           <h1 style={{fontSize: '5rem'}}>Test</h1>
