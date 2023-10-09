@@ -17,6 +17,8 @@ const RootWrapper = styled.div`
   display: flex;
   flex-direction: ${isMobile ? 'column' : 'row'};
   height: 100vh;
+  max-height: 100vh;
+  overflow-y: hidden;
 `
 
 export function App() {
