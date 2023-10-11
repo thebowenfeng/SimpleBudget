@@ -1,4 +1,4 @@
-import {styled} from 'styled-components'
+import { keyframes, styled } from 'styled-components'
 import { Heading, IconButton } from '@chakra-ui/react'
 import React, {
   MutableRefObject,
@@ -51,7 +51,7 @@ export const LabelContainer = styled.div`
 const ChildrenContainer = styled.div`
   display: flex;
   flex-direction: column;
-  transition: max-height 1s linear, min-height 1s linear;
+  transition: max-height 0.5s linear, min-height 0.5s linear;
   overflow: hidden;
 `
 
@@ -68,30 +68,11 @@ function byId(id: string) {
 }
 
 export default function Group(props: Props) {
-  const containerRef = useRef<HTMLDivElement>();
   const [isFolded, setIsFolded] = useState<boolean>(false);
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const budgetState = useBudgetState()
   const { swapCategory } = useBudgetActions();
   const maxChildrenHeight = getChildren(props.id, budgetState).length * 40;
-
-  const fold = () => {
-    setIsFolded((prev) => {
-      if (props.displayChild) {
-        switch (prev) {
-          case true:
-            containerRef.current.style.minHeight = `${maxChildrenHeight}px`;
-            containerRef.current.style.maxHeight = `${maxChildrenHeight}px`;
-            return false;
-          case false:
-            containerRef.current.style.minHeight = '0px';
-            containerRef.current.style.maxHeight = '0px';
-            return true;
-        }
-      }
-      return !prev;
-    })
-  }
 
   const onMouseUp =(event: MouseEvent) => {
     event.stopPropagation()
@@ -139,6 +120,14 @@ export default function Group(props: Props) {
      
   }
 
+  const adjustHeight = (): string => {
+    if (props.displayChild && !isFolded) {
+      return `${maxChildrenHeight}px`
+    } else {
+      return '0px'
+    }
+  }
+
   useEffect(() => {
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
@@ -149,23 +138,11 @@ export default function Group(props: Props) {
     }
   }, [])
 
-  useEffect(() => {
-    if (props.displayChild) {
-      if (isFolded) {
-        containerRef.current.style.minHeight = '0px';
-        containerRef.current.style.maxHeight = '0px';
-      } else {
-        containerRef.current.style.minHeight = `${maxChildrenHeight}px`;
-        containerRef.current.style.maxHeight = `${maxChildrenHeight}px`;
-      }
-    }
-  }, [props.displayChild])
-
   return(
     <>
       <Header id={props.id}>
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
-                    onClick={fold} variant={'link'} fontSize={isMobile ? '30px' : null}>Fold</IconButton>}
+                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : null}>Fold</IconButton>}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
@@ -177,13 +154,16 @@ export default function Group(props: Props) {
         </div>
       </Header>
       {props.displayChild &&
-        <ChildrenContainer ref={containerRef}
-                           style={{minHeight: `${maxChildrenHeight}px`, maxHeight: `${maxChildrenHeight}px`}}
-                           onMouseMove={onMouseMoveFn}>
+        <ChildrenContainer style={{
+                            minHeight: adjustHeight(),
+                            maxHeight: adjustHeight(),
+                          }}
+                          onMouseMove={onMouseMoveFn}>
         {getChildren(props.id, budgetState).map((obj) => {
-          return (<Category title={obj.title} id={obj.id}/>)
+          return (<Category title={obj.title} id={obj.id} key={obj.id}/>)
         })}
-      </ChildrenContainer>}
+        </ChildrenContainer>
+      }
     </>
   )
 }

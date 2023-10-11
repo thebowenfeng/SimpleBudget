@@ -157,7 +157,7 @@ export default function SpreadsheetView() {
       <ViewContainer onMouseMove={onMouseMoveFn} ref={testRef}>
         {budgetState.state.map((obj: GroupType) => {
           return (
-            <Group title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} scrollRef={testRef} />
+            <Group key={obj.id} title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} scrollRef={testRef} />
           )
         })}
       </ViewContainer>

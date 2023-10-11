@@ -21,6 +21,7 @@ const RootContainer = styled.div`
   padding-right: 20px;
   padding-left: 55px;
   user-select: none;
+  transition: top 1s linear;
 `
 
 const ProgressContainer = styled.div`

@@ -12,7 +12,6 @@ interface NavBarEntryProps {
 
 const RootWrapper = styled.div`
   height: 100vh;
-  width: 80px;
   transition: width 1s ease;
   box-shadow: 5px 0 12px 0 rgba(0, 0, 0, 0.19);
   display: flex;
@@ -34,19 +33,6 @@ const slideRight = keyframes`
 
 export default function NavBarDesktop() {
   const [expand, setExpand] = useState<boolean>(false)
-  const wrapperRef = useRef<HTMLDivElement>()
-
-  const onExpand = (prev: boolean):boolean => {
-    switch (prev) {
-      case false:
-        wrapperRef.current.style.width = "180px"
-        break
-      case true:
-        wrapperRef.current.style.width = "80px"
-        break
-    }
-    return !prev
-  }
 
   const NarBarEntry = (props: NavBarEntryProps) => {
     return (
@@ -71,7 +57,7 @@ export default function NavBarDesktop() {
   }
 
   return (
-    <RootWrapper ref={wrapperRef}>
+    <RootWrapper style={{width: expand ? '180px' : '80px'}}>
       {!expand && <Icon boxSize={30} as={BsFillBootstrapFill} sx={{marginBottom: '10px'}}/>}
       {expand && <AppTitle />}
       {navBarItems.map((obj) => {
@@ -79,7 +65,7 @@ export default function NavBarDesktop() {
           <NarBarEntry label={obj.title} icon={obj.icon} />
         )
       })}
-      <IconButton icon={expand ? <ArrowLeftIcon /> : <ArrowRightIcon />} onClick={() => setExpand(onExpand)}
+      <IconButton icon={expand ? <ArrowLeftIcon /> : <ArrowRightIcon />} onClick={() => {setExpand(!expand)}}
                   sx={{ marginTop: 'auto', marginBottom: '10px' }} aria-label={"Expand"}
                   variant={'ghost'}
       />
