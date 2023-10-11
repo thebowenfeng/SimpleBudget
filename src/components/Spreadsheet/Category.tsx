@@ -20,6 +20,7 @@ const RootContainer = styled.div`
   margin-top: -1px;
   padding-right: 20px;
   padding-left: 55px;
+  user-select: none;
 `
 
 const ProgressContainer = styled.div`

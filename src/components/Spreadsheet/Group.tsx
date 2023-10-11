@@ -35,6 +35,7 @@ const Header = styled.div`
   background-color: rgba(215, 215, 215, 1);
   padding-right: 20px;
   padding-left: 20px;
+  user-select: none;
 `
 
 export const LabelContainer = styled.div`
@@ -108,7 +109,7 @@ export default function Group(props: Props) {
 
   const onMouseMoveFn = (event: React.MouseEvent) => {
     event.stopPropagation()
-    
+
     if (dragState.current.isMouseDown) {
       if (!dragState.current.draggedItem) {
         for (const categoryItem of getChildren(props.id, budgetState)) {
@@ -135,7 +136,7 @@ export default function Group(props: Props) {
         }
       }
     }
-
+     
   }
 
   useEffect(() => {
