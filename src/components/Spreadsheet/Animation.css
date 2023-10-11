@@ -1,19 +1,9 @@
-@keyframes top-bottom {
+@keyframes slide-animation {
     0% {
         transform: translateY(0px);
     }
 
     100% {
-        transform: translateY(40px);
-    }
-}
-
-@keyframes bottom-top {
-    0% {
-        transform: translateY(0px);
-    }
-
-    100% {
-        transform: translateY(-40px);
+        transform: translateY(var(--m));
     }
 }

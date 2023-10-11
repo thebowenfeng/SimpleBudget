@@ -36,20 +36,21 @@ function findObj(id: string, lst: GroupType[]): GroupType {
 }
 
 function addAnimation(index1: number, index2: number, id1: string, id2: string) {
-  if (index1 < index2) {
-    document.getElementById(id1).style.animation = "top-bottom 0.3s ease"
-    document.getElementById(id2).style.animation = "bottom-top 0.3s ease"
-  } else {
-    document.getElementById(id2).style.animation = "top-bottom 0.3s ease"
-    document.getElementById(id1).style.animation = "bottom-top 0.3s ease"
+  if (document.getElementById(id1) && document.getElementById(id2)) {
+    document.getElementById(id1).style.animation = "slide-animation 0.3s ease"
+    document.getElementById(id2).style.animation = "slide-animation 0.3s ease"
+    document.getElementById(id1).style.setProperty('--m', `${(index2 - index1) * 40}px`)
+    document.getElementById(id2).style.setProperty('--m', `${(index1 - index2) * 40}px`)
   }
 }
 
 function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | CategoryType) {
-  document.getElementById(item1.id).style.animation = null
-  document.getElementById(item2.id).style.animation = null
-  item1.transitioning = false;
-  item2.transitioning = false;
+  if (document.getElementById(item1.id) && document.getElementById(item2.id)) {
+    document.getElementById(item1.id).style.animation = null
+    document.getElementById(item2.id).style.animation = null
+    item1.transitioning = false;
+    item2.transitioning = false;
+  }
 }
 
 const initialState: BudgetState = {
