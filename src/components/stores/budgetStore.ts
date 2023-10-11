@@ -1,4 +1,5 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
+import '../Spreadsheet/Animation.css'
 
 export interface CategoryType {
   title: string;
@@ -8,6 +9,7 @@ export interface CategoryType {
 export interface GroupType {
   title: string;
   id: string;
+  transitioning: boolean
   children: CategoryType[]
 }
 
@@ -41,14 +43,33 @@ export const actions = {
     setState({ state: data })
   },
   swapGroup: (item1: GroupType, item2: GroupType): Action<BudgetState> =>
-    async ({setState, getState}) => {
-      const newState = [...getState().state]
-      const index1 = getIndex(item1.id, newState);
-      const index2 = getIndex(item2.id, newState);
+    ({setState, getState}) => {
+      if (!item1.transitioning && !item2.transitioning) {
+        item1.transitioning = true;
+        item2.transitioning = true;
+        const newState = [...getState().state]
+        const index1 = getIndex(item1.id, newState);
+        const index2 = getIndex(item2.id, newState);
 
-      newState[index1] = item2;
-      newState[index2] = item1;
-      setState({ state: newState })
+        if (index1 < index2) {
+          document.getElementById(item1.id).style.animation = "top-bottom 0.3s ease"
+          document.getElementById(item2.id).style.animation = "bottom-top 0.3s ease"
+        } else {
+          document.getElementById(item2.id).style.animation = "top-bottom 0.3s ease"
+          document.getElementById(item1.id).style.animation = "bottom-top 0.3s ease"
+        }
+
+        newState[index1] = item2;
+        newState[index2] = item1;
+
+        setTimeout(() => {
+          document.getElementById(item1.id).style.animation = null
+          document.getElementById(item2.id).style.animation = null
+          item1.transitioning = false;
+          item2.transitioning = false;
+          setState({ state: newState })
+        }, 250);
+      }
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {

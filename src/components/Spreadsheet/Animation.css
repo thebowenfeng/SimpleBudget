@@ -1,0 +1,19 @@
+@keyframes top-bottom {
+    0% {
+        transform: translateY(0px);
+    }
+
+    100% {
+        transform: translateY(40px);
+    }
+}
+
+@keyframes bottom-top {
+    0% {
+        transform: translateY(0px);
+    }
+
+    100% {
+        transform: translateY(-40px);
+    }
+}

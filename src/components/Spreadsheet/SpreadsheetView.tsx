@@ -4,6 +4,7 @@ import Group from './Group'
 import { isMobile } from 'react-device-detect'
 import React, { useState, useRef, useEffect } from 'react'
 import { CategoryType, GroupType, useBudgetActions, useBudgetState } from '../stores/budgetStore'
+import './Animation.css'
 
 interface DragState {
   isMouseDown: boolean;
@@ -67,7 +68,7 @@ function genTempStore(): GroupType[] {
       b.push({title: (i*10+j).toString(), id: newId})
     }
     const newId = randId();
-    a.push({title: i.toString(), id: newId, children: b})
+    a.push({title: i.toString(), id: newId, children: b, transitioning: false})
   }
   return a;
 }

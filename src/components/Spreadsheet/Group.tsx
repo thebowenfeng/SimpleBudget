@@ -1,4 +1,4 @@
-import { keyframes, styled } from 'styled-components'
+import { styled } from 'styled-components'
 import { Heading, IconButton } from '@chakra-ui/react'
 import React, {
   MutableRefObject,
@@ -10,6 +10,7 @@ import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
 import Category from './Category'
 import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../stores/budgetStore'
+import './Animation.css'
 
 interface Props {
   id: string,
