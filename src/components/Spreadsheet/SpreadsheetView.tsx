@@ -65,7 +65,7 @@ function genTempStore(): GroupType[] {
     const b: CategoryType[] = [];
     for (let j = 0; j < 10; j++) {
       const newId = randId();
-      b.push({title: (i*10+j).toString(), id: newId})
+      b.push({title: (i*10+j).toString(), id: newId, transitioning: false})
     }
     const newId = randId();
     a.push({title: i.toString(), id: newId, children: b, transitioning: false})

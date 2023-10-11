@@ -4,6 +4,7 @@ import '../Spreadsheet/Animation.css'
 export interface CategoryType {
   title: string;
   id: string;
+  transitioning: boolean;
 }
 
 export interface GroupType {
@@ -34,6 +35,23 @@ function findObj(id: string, lst: GroupType[]): GroupType {
   }
 }
 
+function addAnimation(index1: number, index2: number, id1: string, id2: string) {
+  if (index1 < index2) {
+    document.getElementById(id1).style.animation = "top-bottom 0.3s ease"
+    document.getElementById(id2).style.animation = "bottom-top 0.3s ease"
+  } else {
+    document.getElementById(id2).style.animation = "top-bottom 0.3s ease"
+    document.getElementById(id1).style.animation = "bottom-top 0.3s ease"
+  }
+}
+
+function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | CategoryType) {
+  document.getElementById(item1.id).style.animation = null
+  document.getElementById(item2.id).style.animation = null
+  item1.transitioning = false;
+  item2.transitioning = false;
+}
+
 const initialState: BudgetState = {
   state: []
 }
@@ -51,39 +69,40 @@ export const actions = {
         const index1 = getIndex(item1.id, newState);
         const index2 = getIndex(item2.id, newState);
 
-        if (index1 < index2) {
-          document.getElementById(item1.id).style.animation = "top-bottom 0.3s ease"
-          document.getElementById(item2.id).style.animation = "bottom-top 0.3s ease"
-        } else {
-          document.getElementById(item2.id).style.animation = "top-bottom 0.3s ease"
-          document.getElementById(item1.id).style.animation = "bottom-top 0.3s ease"
-        }
+        addAnimation(index1, index2, item1.id, item2.id);
 
         newState[index1] = item2;
         newState[index2] = item1;
 
         setTimeout(() => {
-          document.getElementById(item1.id).style.animation = null
-          document.getElementById(item2.id).style.animation = null
-          item1.transitioning = false;
-          item2.transitioning = false;
+          removeAnimation(item1, item2);
           setState({ state: newState })
         }, 250);
       }
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {
-      const newState = [...getState().state]
-      const group = findObj(groupId, newState);
-      const newChildrenState = [...group.children]
-      const index1 = getIndex(item1.id, newChildrenState);
-      const index2 = getIndex(item2.id, newChildrenState);
+      if (!item1.transitioning && !item2.transitioning) {
+        item1.transitioning = true;
+        item2.transitioning = true;
+        const newState = [...getState().state]
+        const group = findObj(groupId, newState);
+        const newChildrenState = [...group.children]
+        const index1 = getIndex(item1.id, newChildrenState);
+        const index2 = getIndex(item2.id, newChildrenState);
 
-      newChildrenState[index1] = item2;
-      newChildrenState[index2] = item1;
+        addAnimation(index1, index2, item1.id, item2.id);
 
-      group.children = newChildrenState;
-      setState({ state: newState })
+        newChildrenState[index1] = item2;
+        newChildrenState[index2] = item1;
+
+        group.children = newChildrenState;
+
+        setTimeout(() => {
+          removeAnimation(item1, item2);
+          setState({ state: newState })
+        }, 250);
+      }
     }
 }
 
