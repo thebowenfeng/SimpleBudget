@@ -2,16 +2,12 @@ import styled from 'styled-components'
 import { Button } from '@chakra-ui/react'
 import Group from './Group'
 import { isMobile } from 'react-device-detect'
-import { useCallback, useState, MouseEvent, useRef, MutableRefObject, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { CategoryType, GroupType, useBudgetActions, useBudgetState } from '../stores/budgetStore'
 
 interface DragState {
   isMouseDown: boolean;
-  draggedItem: TempTest;
-}
-
-interface TempTest {
-  title: string,
-  ref: MutableRefObject<HTMLDivElement> | null,
+  draggedItem: GroupType | null;
 }
 
 const ActionsBar = styled.div`
@@ -58,83 +54,84 @@ const LabelContainer = styled.div`
   height: 100%;
 `
 
-function genTempTest(): TempTest[] {
-  const a = [];
+function randId() {
+  return String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now();
+}
+
+function genTempStore(): GroupType[] {
+  const a: GroupType[] = [];
   for (let i = 0; i < 3; i++){
-    const ref = useRef<HTMLDivElement>()
-    a.push({title: i.toString(), ref: ref})
+    const b: CategoryType[] = [];
+    for (let j = 0; j < 3; j++) {
+      const newId = randId();
+      b.push({title: (i*10+j).toString(), id: newId})
+    }
+    const newId = randId();
+    a.push({title: i.toString(), id: newId, children: b})
   }
   return a;
 }
 
-function getIndex(title: string, lst: TempTest[]): number {
-  for (let i = 0; i < lst.length; i++) {
-    const item = lst[i];
-    if (item.title == title) {
-      return i;
-    }
-  }
-  return 9999;
+function byId(id: string) {
+  return document.getElementById(id)
 }
 
 export default function SpreadsheetView() {
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
-  const groups = useRef<TempTest[]>(genTempTest());
-  const [signal, setSignal] = useState<boolean>(false);
   const testRef = useRef<HTMLDivElement>()
   const [displayChild, setDisplayChild] = useState<boolean>(true);
+  const budgetState = useBudgetState()
+  const { loadBudget, swapGroup } = useBudgetActions()
 
-  const onMouseUp = useCallback(() => {
+  const onMouseUp =(event: MouseEvent) => {
+    event.stopPropagation()
     setDisplayChild(true);
     dragState.current.isMouseDown = false;
     if (dragState.current.draggedItem) {
-      dragState.current.draggedItem.ref.current.style.border = null;
-      dragState.current.draggedItem = null;
+      byId(dragState.current.draggedItem.id).style.border = null;
     }
-  }, [])
+    dragState.current.draggedItem = null;
+  }
 
-  const onMouseDown = useCallback(() => {
+  const onMouseDown =(event: MouseEvent) => {
+    event.stopPropagation()
     dragState.current.isMouseDown = true;
-  }, [])
+  }
 
-  const onMouseMoveFn = useCallback(() => {
+  const onMouseMoveFn = (event: React.MouseEvent) => {
+    event.stopPropagation()
     // document.getElementById("abcdefg").innerHTML = (event.pageY - (testRef.current.offsetTop - testRef.current.scrollTop)).toString()
     if (dragState.current.isMouseDown) {
       setDisplayChild(false);
       if (!dragState.current.draggedItem) {
-        for (const group of groups.current) {
-          if (group.ref.current.matches(":hover")) {
-            dragState.current.draggedItem = group;
+        for (const groupItem of budgetState.state) {
+          if (byId(groupItem.id) && byId(groupItem.id).matches(":hover")) {
+            dragState.current.draggedItem = groupItem;
             break;
           }
         }
       }
 
       if (dragState.current.draggedItem) {
-        dragState.current.draggedItem.ref.current.style.border = "2px solid blue";
+        byId(dragState.current.draggedItem.id).style.border = "2px solid blue";
 
-        for (const group of groups.current) {
-          if (group.ref.current.matches(":hover") && group.title != dragState.current.draggedItem.title) {
-            const currInd = getIndex(dragState.current.draggedItem.title, groups.current)
-            const newInd = getIndex(group.title, groups.current)
-
-            groups.current[newInd] = dragState.current.draggedItem;
-            groups.current[currInd] = group
-            setSignal((prevState) => !prevState);
-            break;
+        for (const group of budgetState.state) {
+          if (byId(group.id).matches(":hover") && group.id != dragState.current.draggedItem.id) {
+            swapGroup(group, dragState.current.draggedItem);
           }
         }
 
-        for (const group of groups.current) {
-          if (group.title != dragState.current.draggedItem.title) {
-            group.ref.current.style.border = null;
+        for (const group of budgetState.state) {
+          if (group.id != dragState.current.draggedItem.id) {
+            byId(group.id).style.border = null;
           }
         }
       }
     }
-  }, [])
+  }
 
   useEffect(() => {
+    loadBudget(genTempStore())
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
 
@@ -152,18 +149,16 @@ export default function SpreadsheetView() {
       </ActionsBar>
       <LabelHeader>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}} id={"abcdefg"}>Available</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>Available</h1>
         </LabelContainer>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}} id={"hijklmn"}>Assigned</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>Assigned</h1>
         </LabelContainer>
       </LabelHeader>
       <ViewContainer onMouseMove={onMouseMoveFn} ref={testRef}>
-        {groups.current.map((obj: TempTest) => {
+        {budgetState.state.map((obj: GroupType) => {
           return (
-            <Group title={obj.title} assigned={100} available={80} ref={obj.ref} displayChild={displayChild}>
-
-            </Group>
+            <Group title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} />
           )
         })}
       </ViewContainer>
