@@ -32,7 +32,7 @@ const ProgressContainer = styled.div`
 export default function Category(props: Props) {
   return(
     <RootContainer id={props.id}>
-      <h1 style={{fontSize: '1.1rem'}}>{props.title}</h1>
+      <h1 style={{fontSize: isMobile ? '2rem' : '1.1rem'}}>{props.title}</h1>
       <ProgressContainer>
         <Progress value={80} sx={{borderRadius: '50px'}}/>
       </ProgressContainer>

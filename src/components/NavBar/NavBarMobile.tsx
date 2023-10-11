@@ -5,12 +5,14 @@ import { Heading, IconButton } from '@chakra-ui/react'
 const RootContainer = styled.div`
   width: 100vw;
   height: 200px;
-  margin-top: auto;
+  position: absolute;
+  bottom: 0;
   box-shadow: 5px 0 12px 0 rgba(0, 0, 0, 0.19);
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  z-index: 10;
 `
 
 const NavBarEntryContainer = styled.div`

@@ -4,6 +4,7 @@
     }
 
     100% {
+        /* Dynamically added property --m controls how far the slide extends to */
         transform: translateY(var(--m));
     }
 }

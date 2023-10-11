@@ -25,7 +25,7 @@ const ViewContainer = styled.div`
   display: flex;
   flex-direction: column;
   overflow: scroll;
-  max-height: calc(100vh - 150px);
+  max-height: ${isMobile ? "calc(100vh - 560px)" : "calc(100vh - 150px)"};
   padding-bottom: 30px;
   scrollbar-gutter: stable;
 `
@@ -79,7 +79,6 @@ function byId(id: string) {
 
 export default function SpreadsheetView() {
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
-  const testRef = useRef<HTMLDivElement>()
   const [displayChild, setDisplayChild] = useState<boolean>(true);
   const budgetState = useBudgetState()
   const { loadBudget, swapGroup } = useBudgetActions()
@@ -155,10 +154,10 @@ export default function SpreadsheetView() {
           <h1 style={{fontSize: isMobile ? '1.75rem' : null}} id={"def"}>Assigned</h1>
         </LabelContainer>
       </LabelHeader>
-      <ViewContainer onMouseMove={onMouseMoveFn} ref={testRef}>
+      <ViewContainer onMouseMove={onMouseMoveFn}>
         {budgetState.state.map((obj: GroupType) => {
           return (
-            <Group key={obj.id} title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} scrollRef={testRef} />
+            <Group key={obj.id} title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} />
           )
         })}
       </ViewContainer>

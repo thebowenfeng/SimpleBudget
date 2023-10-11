@@ -1,7 +1,6 @@
 import { styled } from 'styled-components'
 import { Heading, IconButton } from '@chakra-ui/react'
 import React, {
-  MutableRefObject,
   useEffect,
   useRef,
   useState
@@ -17,7 +16,6 @@ interface Props {
   title: string,
   assigned: number,
   available: number,
-  scrollRef: MutableRefObject<HTMLDivElement>,
   displayChild: boolean
 }
 
@@ -73,7 +71,7 @@ export default function Group(props: Props) {
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const budgetState = useBudgetState()
   const { swapCategory } = useBudgetActions();
-  const maxChildrenHeight = getChildren(props.id, budgetState).length * 40;
+  const maxChildrenHeight = getChildren(props.id, budgetState).length * (isMobile ? 80 : 40);
 
   const onMouseUp =(event: MouseEvent) => {
     event.stopPropagation()
@@ -143,7 +141,7 @@ export default function Group(props: Props) {
     <>
       <Header id={props.id}>
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
-                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : null}>Fold</IconButton>}
+                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : null} />}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
