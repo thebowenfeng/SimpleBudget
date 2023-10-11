@@ -55,14 +55,14 @@ const LabelContainer = styled.div`
 `
 
 function randId() {
-  return String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now();
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
 function genTempStore(): GroupType[] {
   const a: GroupType[] = [];
   for (let i = 0; i < 3; i++){
     const b: CategoryType[] = [];
-    for (let j = 0; j < 3; j++) {
+    for (let j = 0; j < 10; j++) {
       const newId = randId();
       b.push({title: (i*10+j).toString(), id: newId})
     }
@@ -100,7 +100,6 @@ export default function SpreadsheetView() {
 
   const onMouseMoveFn = (event: React.MouseEvent) => {
     event.stopPropagation()
-    // document.getElementById("abcdefg").innerHTML = (event.pageY - (testRef.current.offsetTop - testRef.current.scrollTop)).toString()
     if (dragState.current.isMouseDown) {
       setDisplayChild(false);
       if (!dragState.current.draggedItem) {
@@ -149,16 +148,16 @@ export default function SpreadsheetView() {
       </ActionsBar>
       <LabelHeader>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>Available</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : null}} id={"abc"}>Available</h1>
         </LabelContainer>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>Assigned</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : null}} id={"def"}>Assigned</h1>
         </LabelContainer>
       </LabelHeader>
       <ViewContainer onMouseMove={onMouseMoveFn} ref={testRef}>
         {budgetState.state.map((obj: GroupType) => {
           return (
-            <Group title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} />
+            <Group title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} scrollRef={testRef} />
           )
         })}
       </ViewContainer>

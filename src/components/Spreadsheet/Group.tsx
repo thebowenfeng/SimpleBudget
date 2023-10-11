@@ -1,6 +1,7 @@
 import {styled} from 'styled-components'
 import { Heading, IconButton } from '@chakra-ui/react'
 import React, {
+  MutableRefObject,
   useEffect,
   useRef,
   useState
@@ -15,6 +16,7 @@ interface Props {
   title: string,
   assigned: number,
   available: number,
+  scrollRef: MutableRefObject<HTMLDivElement>,
   displayChild: boolean
 }
 
@@ -106,7 +108,7 @@ export default function Group(props: Props) {
 
   const onMouseMoveFn = (event: React.MouseEvent) => {
     event.stopPropagation()
-    // document.getElementById("abcdefg").innerHTML = (event.pageY - (testRef.current.offsetTop - testRef.current.scrollTop)).toString()
+    
     if (dragState.current.isMouseDown) {
       if (!dragState.current.draggedItem) {
         for (const categoryItem of getChildren(props.id, budgetState)) {
@@ -133,6 +135,7 @@ export default function Group(props: Props) {
         }
       }
     }
+
   }
 
   useEffect(() => {
