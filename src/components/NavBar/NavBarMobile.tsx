@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { navBarItems } from './config'
+import { navBarItems } from './config.tsx'
 import { Heading, IconButton } from '@chakra-ui/react'
 
 const RootContainer = styled.div`

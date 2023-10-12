@@ -29,9 +29,9 @@ const LoginWrapper = styled.div`
 type ToastStatus = 'info' | 'warning' | 'success' | 'error' | 'loading'
 
 export default function Login() {
-  const [show, useShow] = useState<boolean>(false);
-  const emailRef = useRef<HTMLInputElement>();
-  const pswdRef = useRef<HTMLInputElement>();
+  const [show, setShow] = useState<boolean>(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const pswdRef = useRef<HTMLInputElement>(null);
   const toast = useToast()
   const auth = getAuth()
 
@@ -53,11 +53,13 @@ export default function Login() {
         showToast("Empty password", "error")
       } else {
         setPersistence(auth, browserLocalPersistence).then(() => {
-          signInWithEmailAndPassword(auth, emailRef.current.value, pswdRef.current.value).then((userCreds) => {
-            showToast("Login success", "success")
-          }).catch((error) => {
-            showToast(error.code, "error", error.message)
-          })
+          if (emailRef.current && pswdRef.current) {
+            signInWithEmailAndPassword(auth, emailRef.current.value, pswdRef.current?.value).then(() => {
+              showToast("Login success", "success")
+            }).catch((error) => {
+              showToast(error.code, "error", error.message)
+            })
+          }
         }).catch((error) => {
           showToast(error.code, "error", error.message)
         })
@@ -82,7 +84,7 @@ export default function Login() {
             sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}
           />
           <InputRightElement width='4.5rem' top={isMobile ? '20px' : '4px'}>
-            <Button h={isMobile ? '4rem' : '2rem'} size={isMobile ? 'lg' : 'sm'} onClick={() => useShow((prev) => !prev)}>
+            <Button h={isMobile ? '4rem' : '2rem'} size={isMobile ? 'lg' : 'sm'} onClick={() => {setShow((prev) => !prev)}}>
               {show ? 'Hide' : 'Show'}
             </Button>
           </InputRightElement>

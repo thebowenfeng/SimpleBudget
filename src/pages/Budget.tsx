@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import MonthPicker from '../components/MonthPicker'
+import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
-import { BudgetSection } from '../components/Spreadsheet'
+import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
 
 const RootContainer = styled.div`
   display: flex;
@@ -45,7 +45,7 @@ export default function Budget() {
         </HeaderContainer>
       </Header>
       <Body>
-        <BudgetSection />
+        <SpreadsheetView />
       </Body>
     </RootContainer>
   )

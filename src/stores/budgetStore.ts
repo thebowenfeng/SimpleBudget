@@ -1,5 +1,5 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
-import '../Spreadsheet/Animation.css'
+import '../components/Spreadsheet/Animation.css'
 
 export interface CategoryType {
   title: string;
@@ -27,27 +27,32 @@ function getIndex(id: string, lst: GroupType[] | CategoryType[]): number {
   return 9999;
 }
 
-function findObj(id: string, lst: GroupType[]): GroupType {
+function findObj(id: string, lst: GroupType[]): GroupType | null {
   for (const item of lst) {
     if (item.id == id) {
       return item;
     }
   }
+  return null;
 }
 
 function addAnimation(index1: number, index2: number, id1: string, id2: string) {
   if (document.getElementById(id1) && document.getElementById(id2)) {
+    // @ts-ignore
     document.getElementById(id1).style.animation = "slide-animation 0.3s ease"
+    // @ts-ignore
     document.getElementById(id2).style.animation = "slide-animation 0.3s ease"
+    // @ts-ignore
     document.getElementById(id1).style.setProperty('--m', `${(index2 - index1) * 40}px`)
+    // @ts-ignore
     document.getElementById(id2).style.setProperty('--m', `${(index1 - index2) * 40}px`)
   }
 }
 
 function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | CategoryType) {
   if (document.getElementById(item1.id) && document.getElementById(item2.id)) {
-    document.getElementById(item1.id).style.animation = null
-    document.getElementById(item2.id).style.animation = null
+    document.getElementById(item1.id)?.style.removeProperty('animation')
+    document.getElementById(item2.id)?.style.removeProperty('animation')
     item1.transitioning = false;
     item2.transitioning = false;
   }
@@ -88,21 +93,23 @@ export const actions = {
         item2.transitioning = true;
         const newState = [...getState().state]
         const group = findObj(groupId, newState);
-        const newChildrenState = [...group.children]
-        const index1 = getIndex(item1.id, newChildrenState);
-        const index2 = getIndex(item2.id, newChildrenState);
+        if (group) {
+          const newChildrenState = [...group.children]
+          const index1 = getIndex(item1.id, newChildrenState);
+          const index2 = getIndex(item2.id, newChildrenState);
 
-        addAnimation(index1, index2, item1.id, item2.id);
+          addAnimation(index1, index2, item1.id, item2.id);
 
-        newChildrenState[index1] = item2;
-        newChildrenState[index2] = item1;
+          newChildrenState[index1] = item2;
+          newChildrenState[index2] = item1;
 
-        group.children = newChildrenState;
+          group.children = newChildrenState;
 
-        setTimeout(() => {
-          removeAnimation(item1, item2);
-          setState({ state: newState })
-        }, 250);
+          setTimeout(() => {
+            removeAnimation(item1, item2);
+            setState({ state: newState })
+          }, 250);
+        }
       }
     }
 }

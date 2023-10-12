@@ -1,15 +1,16 @@
 import firebaseSdkConfig from "./firebaseConfig.json"
 import { initializeApp } from "firebase/app"
 import { ChakraProvider } from '@chakra-ui/react'
-import { FirebaseContext } from './contexts/FirebaseContext'
-import Login from './pages/Login'
+import { FirebaseContext } from './contexts/FirebaseContext.ts'
+import Login from './pages/Login.tsx'
 import { getAuth, signOut } from 'firebase/auth'
 import { useEffect, useState } from 'react'
-import GenericLoading from './pages/GenericLoading'
+import GenericLoading from './pages/GenericLoading.tsx'
 import { isMobile } from 'react-device-detect'
 import { styled } from 'styled-components'
-import { NBDesktop, NBMobile } from './components/NavBar'
-import Budget from './pages/Budget'
+import NavBarDesktop from './components/NavBar/NavBarDesktop.tsx'
+import NavBarMobile from './components/NavBar/NavBarMobile.tsx'
+import Budget from './pages/Budget.tsx'
 
 type Page = "undefined" | "login" | "budget"
 
@@ -21,7 +22,7 @@ const RootWrapper = styled.div`
   overflow-y: hidden;
 `
 
-export function App() {
+export default function App() {
   const config = firebaseSdkConfig.result.sdkConfig
   const app = initializeApp(config)
   const auth = getAuth()
@@ -30,7 +31,7 @@ export function App() {
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
-      if (user) {
+      if (user?.metadata.lastSignInTime) {
         // Invalidates session after a day
         if (new Date().getTime() - new Date(user.metadata.lastSignInTime).getTime() > 86400000) {
           signOut(auth).then(() => {
@@ -45,7 +46,7 @@ export function App() {
         setPage("login")
       }
     })
-  }, [])
+  }, [auth])
 
   return (
     <ChakraProvider toastOptions={{ defaultOptions: {
@@ -59,9 +60,9 @@ export function App() {
         {page == "login" && <Login />}
         {(page != "login" && page != "undefined") &&
           <RootWrapper>
-            {!isMobile && <NBDesktop />}
+            {!isMobile && <NavBarDesktop/>}
             {page == "budget" && <Budget />}
-            {isMobile && <NBMobile />}
+            {isMobile && <NavBarMobile />}
           </RootWrapper>
         }
       </FirebaseContext.Provider>

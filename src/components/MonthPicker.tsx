@@ -18,20 +18,10 @@ const renderMonthYear = (month: number, year: number): string => {
   return `${months[month]} - ${year.toString()}`
 }
 
-export function useYear() {
-  const [year, setYear] = useState<number>(new Date().getFullYear())
-  return { year, setYear }
-}
-
-export function useMonth() {
-  const [month, setMonth] = useState<number>(new Date().getMonth())
-  return { month, setMonth }
-}
-
 export default function MonthPicker() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { year, setYear} = useYear()
-  const { month, setMonth } = useMonth()
+  const [year, setYear] = useState<number>(new Date().getFullYear())
+  const [month, setMonth] = useState<number>(new Date().getMonth())
 
   const forward = () => {
     setMonth((prev) => {
@@ -71,7 +61,7 @@ export default function MonthPicker() {
                   variant={'ghost'} onClick={forward}/>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} isCentered size={'xl'}>
         <ModalOverlay />
-        <ModalContent height={isMobile ? '30vh' : null} maxW={isMobile ? '80vw' : null}>
+        <ModalContent height={isMobile ? '30vh' : undefined} maxW={isMobile ? '80vw' : undefined}>
           <ModalHeader sx={{
             display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', columnGap: '20px',
             fontSize: isMobile ? '3rem' : 'var(--chakra-fontSizes-xl);',
@@ -90,7 +80,7 @@ export default function MonthPicker() {
             justifyContent: 'center', rowGap: '20px', marginBottom: '20px'
           }}>
             {months.map((month) => {
-              return(<Button width={'30%'} height={isMobile ? '100px' : null} fontSize={isMobile ? '2rem' : null} onClick={() => {
+              return(<Button width={'30%'} height={isMobile ? '100px' : undefined} fontSize={isMobile ? '2rem' : undefined} onClick={() => {
                 setMonth(months.indexOf(month))
                 setIsOpen(false)
               }}>{month}</Button>)

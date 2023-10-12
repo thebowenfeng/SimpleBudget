@@ -1,9 +1,9 @@
 import { keyframes, styled } from 'styled-components'
-import { ReactElement, useRef, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import { Button, IconButton, Heading } from '@chakra-ui/react'
 import { Icon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { BsFillBootstrapFill } from 'react-icons/bs'
-import { NavBarItem, navBarItems } from './config'
+import { navBarItems } from './config.tsx'
 
 interface NavBarEntryProps {
   label: string,

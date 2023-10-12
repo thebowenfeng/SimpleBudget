@@ -7,8 +7,8 @@ import React, {
 } from 'react'
 import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
-import Category from './Category'
-import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../stores/budgetStore'
+import Category from './Category.tsx'
+import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
 
 interface Props {
@@ -60,6 +60,7 @@ function getChildren(groupId: string, state: BudgetState) {
       return group.children
     }
   }
+  return [];
 }
 
 function byId(id: string) {
@@ -77,7 +78,7 @@ export default function Group(props: Props) {
     event.stopPropagation()
     dragState.current.isMouseDown = false;
     if (dragState.current.draggedItem) {
-      byId(dragState.current.draggedItem.id).style.border = null;
+      byId(dragState.current.draggedItem.id)?.style.removeProperty('border');
     }
     dragState.current.draggedItem = null;
   }
@@ -93,25 +94,26 @@ export default function Group(props: Props) {
     if (dragState.current.isMouseDown) {
       if (!dragState.current.draggedItem) {
         for (const categoryItem of getChildren(props.id, budgetState)) {
-          if (byId(categoryItem.id) && byId(categoryItem.id).matches(":hover")) {
+          if (byId(categoryItem.id) && byId(categoryItem.id)?.matches(":hover")) {
             dragState.current.draggedItem = categoryItem;
             break;
           }
         }
       }
 
-      if (dragState.current.draggedItem) {
+      if (dragState.current.draggedItem && byId(dragState.current.draggedItem.id)) {
+        // @ts-ignore
         byId(dragState.current.draggedItem.id).style.border = "2px solid blue";
 
         for (const categoryItem of getChildren(props.id, budgetState)) {
-          if (byId(categoryItem.id).matches(":hover") && categoryItem.id != dragState.current.draggedItem.id) {
+          if (byId(categoryItem.id)?.matches(":hover") && categoryItem.id != dragState.current.draggedItem.id) {
             swapCategory(props.id, categoryItem, dragState.current.draggedItem);
           }
         }
 
         for (const categoryItem of getChildren(props.id, budgetState)) {
           if (categoryItem.id != dragState.current.draggedItem.id) {
-            byId(categoryItem.id).style.border = null;
+            byId(categoryItem.id)?.style.removeProperty('border')
           }
         }
       }
@@ -141,14 +143,14 @@ export default function Group(props: Props) {
     <>
       <Header id={props.id}>
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
-                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : null} />}
+                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : undefined} />}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
-            <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>${props.available}</h1>
+            <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>${props.available}</h1>
           </LabelContainer>
           <LabelContainer>
-            <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>${props.assigned}</h1>
+            <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>${props.assigned}</h1>
           </LabelContainer>
         </div>
       </Header>

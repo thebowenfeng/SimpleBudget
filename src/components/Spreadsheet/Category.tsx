@@ -1,6 +1,6 @@
 import { styled } from 'styled-components'
 import { isMobile } from 'react-device-detect'
-import { LabelContainer } from './Group'
+import { LabelContainer } from './Group.tsx'
 import { Progress } from '@chakra-ui/react'
 
 interface Props {
@@ -38,10 +38,10 @@ export default function Category(props: Props) {
       </ProgressContainer>
       <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>$100</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>$100</h1>
         </LabelContainer>
         <LabelContainer>
-          <h1 style={{fontSize: isMobile ? '1.75rem' : null}}>$100</h1>
+          <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>$100</h1>
         </LabelContainer>
       </div>
     </RootContainer>
