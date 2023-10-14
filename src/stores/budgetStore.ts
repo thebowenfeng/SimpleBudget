@@ -111,6 +111,32 @@ export const actions = {
           }, 250);
         }
       }
+    },
+  addGroup: (groupId: string, title: string): Action<BudgetState> =>
+    ({setState, getState}) => {
+      const currState = [...getState().state]
+      currState.push({
+        id: groupId,
+        title: title,
+        transitioning: false,
+        children: []
+      })
+      setState({state: currState})
+    },
+  removeGroup: (groupId: string): Action<BudgetState> =>
+    ({getState, setState}) => {
+      const currState = [...getState().state];
+      const newState = currState.filter((obj) => obj.id != groupId);
+      setState({state: newState})
+    },
+  modifyGroup: (groupId: string, newGroup: GroupType): Action<BudgetState> =>
+    ({setState, getState}) => {
+      const newState = [...getState().state];
+      const ind = getIndex(groupId, newState);
+      newState.splice(ind, 1);
+      newState.splice(ind, 0, newGroup);
+
+      setState({state: newState});
     }
 }
 

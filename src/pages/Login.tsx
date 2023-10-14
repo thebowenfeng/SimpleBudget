@@ -3,6 +3,7 @@ import { Button, Input, InputRightElement, InputGroup, useToast } from '@chakra-
 import { useRef, useState } from 'react'
 import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { isMobile } from 'react-device-detect'
+import { showToast } from '../utils/toast.ts'
 
 const RootWrapper = styled.div`
   height: 100vh;
@@ -26,8 +27,6 @@ const LoginWrapper = styled.div`
   border-radius: 30px;
 `
 
-type ToastStatus = 'info' | 'warning' | 'success' | 'error' | 'loading'
-
 export default function Login() {
   const [show, setShow] = useState<boolean>(false);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -35,33 +34,23 @@ export default function Login() {
   const toast = useToast()
   const auth = getAuth()
 
-  const showToast = (title: string, type: ToastStatus, description?: string): void => {
-    toast({
-      title: title,
-      description: description,
-      status: type,
-      duration: 3000,
-      isClosable: true
-    })
-  }
-
   const onLogin = () => {
     if(emailRef.current && pswdRef.current) {
       if (emailRef.current.value == '') {
-        showToast("Empty email", 'error')
+        showToast(toast,"Empty email", 'error')
       } else if (pswdRef.current.value == '') {
-        showToast("Empty password", "error")
+        showToast(toast,"Empty password", "error")
       } else {
         setPersistence(auth, browserLocalPersistence).then(() => {
           if (emailRef.current && pswdRef.current) {
             signInWithEmailAndPassword(auth, emailRef.current.value, pswdRef.current?.value).then(() => {
-              showToast("Login success", "success")
+              showToast(toast,"Login success", "success")
             }).catch((error) => {
-              showToast(error.code, "error", error.message)
+              showToast(toast, error.code, "error", error.message)
             })
           }
         }).catch((error) => {
-          showToast(error.code, "error", error.message)
+          showToast(toast, error.code, "error", error.message)
         })
       }
     }

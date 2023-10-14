@@ -3,9 +3,10 @@ import { Button } from '@chakra-ui/react'
 import Group from './Group.tsx'
 import { isMobile } from 'react-device-detect'
 import React, { useState, useRef, useEffect } from 'react'
-import { CategoryType, GroupType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
+import { GroupType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
+import DeleteGroupDrawer from './DeleteGroupDrawer.tsx'
 
 interface DragState {
   isMouseDown: boolean;
@@ -56,24 +57,6 @@ const LabelContainer = styled.div`
   height: 100%;
 `
 
-function randId() {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
-}
-
-function genTempStore(): GroupType[] {
-  const a: GroupType[] = [];
-  for (let i = 0; i < 3; i++){
-    const b: CategoryType[] = [];
-    for (let j = 0; j < 10; j++) {
-      const newId = randId();
-      b.push({title: (i*10+j).toString(), id: newId, transitioning: false})
-    }
-    const newId = randId();
-    a.push({title: i.toString(), id: newId, children: b, transitioning: false})
-  }
-  return a;
-}
-
 function byId(id: string) {
   return document.getElementById(id)
 }
@@ -82,8 +65,9 @@ export default function SpreadsheetView() {
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const [displayChild, setDisplayChild] = useState<boolean>(true);
   const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false);
+  const [isDeleteGroup, setIsDeleteGroup] = useState<boolean>(false);
   const budgetState = useBudgetState()
-  const { loadBudget, swapGroup } = useBudgetActions()
+  const { swapGroup } = useBudgetActions()
 
   const onMouseUp =(event: MouseEvent) => {
     event.stopPropagation()
@@ -133,7 +117,6 @@ export default function SpreadsheetView() {
   }
 
   useEffect(() => {
-    loadBudget(genTempStore())
     document.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mouseup", onMouseUp);
 
@@ -141,14 +124,14 @@ export default function SpreadsheetView() {
       document.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mouseup", onMouseUp);
     }
-  }, [loadBudget])
+  }, [])
 
   return (
     <>
-      <CreateGroupDrawer isOpen={isCreateGroup} onClose={() => {setIsCreateGroup(false)}} />
       <ActionsBar>
         <Button variant={'link'} fontSize={isMobile ? '2.5rem' : undefined} onClick={() => setIsCreateGroup(true)}>Create group</Button>
-        <Button sx={{marginLeft: 'auto'}} variant={'link'} fontSize={isMobile ? '2.5rem' : undefined}>Delete group</Button>
+        <Button sx={{marginLeft: 'auto'}} variant={'link'}
+                fontSize={isMobile ? '2.5rem' : undefined} onClick={() => setIsDeleteGroup(true)}>Delete group</Button>
       </ActionsBar>
       <LabelHeader>
         <LabelContainer>
@@ -165,6 +148,8 @@ export default function SpreadsheetView() {
           )
         })}
       </ViewContainer>
+      <CreateGroupDrawer isOpen={isCreateGroup} onClose={() => {setIsCreateGroup(false)}}/>
+      <DeleteGroupDrawer isOpen={isDeleteGroup} onClose={() => {setIsDeleteGroup(false)}} />
     </>
   )
 }

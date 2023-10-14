@@ -2,6 +2,13 @@ import styled from 'styled-components'
 import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
 import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
+import { GroupType, useBudgetActions } from '../stores/budgetStore.ts'
+import { useContext, useEffect } from 'react'
+import { collection, getDocs, getFirestore, query } from 'firebase/firestore'
+import { FirebaseContext } from '../contexts/FirebaseContext.ts'
+import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
+import { useToast } from '@chakra-ui/react'
+import { showToast } from '../utils/toast.ts'
 
 const RootContainer = styled.div`
   display: flex;
@@ -34,6 +41,31 @@ const Body = styled.div`
 `
 
 export default function Budget() {
+  const { loadBudget } = useBudgetActions();
+  const app = useContext(FirebaseContext);
+  const user = useContext(FirebaseAuthContext);
+  const db = app ? getFirestore(app) : undefined;
+  const toast = useToast();
+
+  useEffect(() => {
+    if (user && db) {
+      getDocs(query(collection(db, user.uid))).then((snapshot) => {
+        const newData: GroupType[] = []
+        snapshot.forEach((doc) => {
+          newData.push({
+            id: doc.id,
+            title: doc.data()["title"],
+            transitioning: false,
+            children: []
+          })
+        })
+        loadBudget(newData);
+      }).catch((error) => {
+        showToast(toast, error.code, "error");
+      })
+    }
+  }, [])
+
   return (
     <RootContainer>
       <Header>
