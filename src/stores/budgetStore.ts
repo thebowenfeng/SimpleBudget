@@ -98,6 +98,7 @@ export const actions = {
               }
             })
           });
+          // eslint-disable-next-line
         } catch (e: any) {
           onError(e as never);
           setState({ state: [], loading: false })
@@ -212,6 +213,7 @@ export const actions = {
         groupObj.children = [...groupObj.children, budget];
         setState({state: [...getState().state]})
 
+        // eslint-disable-next-line
         const {id: _, transitioning: __, ...dbRecord} = budget;
 
         addDoc(collection(db, user.uid, groupId, "categories"), dbRecord).then((docRef) => {

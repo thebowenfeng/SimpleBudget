@@ -98,7 +98,7 @@ export default function CreateBudgetDrawer(props: Props) {
   }
 
   return(
-    <Drawer isOpen={props.isOpen} onClose={props.onClose} mobileHeight={'30vh'}>
+    <Drawer isOpen={props.isOpen} onClose={props.onClose} mobileHeight={'45vh'}>
       <Container onMouseMove={(event) => {event.stopPropagation()}}>
         <TitleContainer>
           <Heading fontSize={isMobile ? '3rem' : '2rem'}>Create budget</Heading>
@@ -134,8 +134,10 @@ export default function CreateBudgetDrawer(props: Props) {
               color='gray.300'
               fontSize='1.2em'
               children='$'
+              sx={{fontSize: isMobile ? "2rem" : undefined}} height={isMobile ? "80px" : undefined}
             />
-            <Input placeholder='Enter amount' ref={amountRef} type={"number"}/>
+            <Input placeholder='Enter amount' ref={amountRef} type={"number"}
+                   sx={{fontSize: isMobile ? "2rem" : undefined}} height={isMobile ? "80px" : undefined}/>
           </InputGroup>
         </div>
         <Button sx={{marginTop: "20px", fontSize: isMobile? "2rem" : undefined, height: isMobile ? '100px' : undefined}}

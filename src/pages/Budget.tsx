@@ -56,7 +56,7 @@ export default function Budget() {
         showToast(toast, error.code, "error", error.message)
       })
     }
-  }, [db, user])
+  })
 
   return (
     <RootContainer>
