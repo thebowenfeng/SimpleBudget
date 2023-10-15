@@ -1,10 +1,16 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
 import '../components/Spreadsheet/Animation.css'
+import { Firestore, addDoc, collection, doc, deleteDoc, getDocs, query, where } from 'firebase/firestore'
+import { User } from 'firebase/auth'
 
 export interface CategoryType {
   title: string;
   id: string;
   transitioning: boolean;
+  type: "spending" | "saving";
+  frequency: "daily" | "weekly" | "monthly" | "yearly";
+  amount: number;
+  rawAmount: number;
 }
 
 export interface GroupType {
@@ -14,7 +20,7 @@ export interface GroupType {
   children: CategoryType[]
 }
 
-export type BudgetState = { state: GroupType[] }
+export type BudgetState = { state: GroupType[], loading: boolean }
 export type BudgetActions = typeof actions
 
 function getIndex(id: string, lst: GroupType[] | CategoryType[]): number {
@@ -58,13 +64,52 @@ function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | Cat
   }
 }
 
+export function randId() {
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+}
+
 const initialState: BudgetState = {
-  state: []
+  state: [],
+  loading: false
 }
 
 export const actions = {
-  loadBudget: (data: GroupType[]): Action<BudgetState> => ({setState}) => {
-    setState({ state: data })
+  loadBudget: (db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> => ({setState}) => {
+    setState({state: [], loading: true})
+    getDocs(query(collection(db, user.uid), where("recordType", "==", "group"))).then(async (snapshot) => {
+      const newData: GroupType[] = []
+      for (const doc of snapshot.docs) {
+        try {
+          const budgetCategories = await getDocs(query(collection(db, user.uid, doc.id, "categories")));
+
+          newData.push({
+            id: doc.id,
+            title: doc.data()["title"],
+            transitioning: false,
+            children: budgetCategories.docs.map((obj) => {
+              return {
+                id: obj.id,
+                title: obj.data()["title"],
+                transitioning: false,
+                type: obj.data()["type"],
+                frequency: obj.data()["frequency"],
+                amount: obj.data()["amount"],
+                rawAmount: obj.data()["rawAmount"]
+              }
+            })
+          });
+        } catch (e: any) {
+          onError(e as never);
+          setState({ state: [], loading: false })
+          return;
+        }
+      }
+
+      onSuccess();
+      setState({ state: newData, loading: false })
+    }).catch((error) => {
+      onError(error as never);
+    })
   },
   swapGroup: (item1: GroupType, item2: GroupType): Action<BudgetState> =>
     ({setState, getState}) => {
@@ -112,22 +157,44 @@ export const actions = {
         }
       }
     },
-  addGroup: (groupId: string, title: string): Action<BudgetState> =>
+  addGroup: (title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const currState = [...getState().state]
+      const tempId = randId();
+
       currState.push({
-        id: groupId,
+        id: tempId,
         title: title,
         transitioning: false,
         children: []
       })
       setState({state: currState})
+
+      addDoc(collection(db, user.uid), {title: title, recordType: "group"}).then((obj) => {
+        const curr = [...getState().state];
+        curr[getIndex(tempId, curr)].id = obj.id
+        setState({state: curr});
+        onSuccess();
+      }).catch((error) => {
+        const newState = [...getState().state].filter((obj) => obj.id != tempId)
+        setState({state: newState})
+        onError(error as never);
+      })
     },
-  removeGroup: (groupId: string): Action<BudgetState> =>
+  removeGroup: (groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
     ({getState, setState}) => {
       const currState = [...getState().state];
+      const removedObj = currState.filter((obj) => obj.id == groupId)[0];
       const newState = currState.filter((obj) => obj.id != groupId);
-      setState({state: newState})
+      setState({state: newState});
+
+      // TODO: Delete budget subcollection
+      deleteDoc(doc(db, user.uid, groupId)).then(() => {
+        onSuccess();
+      }).catch((error) => {
+        onError(error as never);
+        setState({state: [...getState().state, removedObj]})
+      })
     },
   modifyGroup: (groupId: string, newGroup: GroupType): Action<BudgetState> =>
     ({setState, getState}) => {
@@ -137,6 +204,29 @@ export const actions = {
       newState.splice(ind, 0, newGroup);
 
       setState({state: newState});
+    },
+  addBudget: (budget: CategoryType, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+    ({setState, getState}) => {
+      const groupObj = findObj(groupId, getState().state);
+      if (groupObj) {
+        groupObj.children = [...groupObj.children, budget];
+        setState({state: [...getState().state]})
+
+        const {id: _, transitioning: __, ...dbRecord} = budget;
+
+        addDoc(collection(db, user.uid, groupId, "categories"), dbRecord).then((docRef) => {
+          onSuccess();
+          const categoryIndex = getIndex(budget.id, groupObj.children);
+          groupObj.children[categoryIndex].id = docRef.id;
+          setState({state: [...getState().state]});
+        }).catch((error) => {
+          onError(error as never);
+          groupObj.children = groupObj.children.filter((obj) => obj.id != budget.id);
+          setState({state: [...getState().state]})
+        })
+      } else {
+        onError({code: "Invalid group", message: "Cannot find group"} as never);
+      }
     }
 }
 

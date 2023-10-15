@@ -6,8 +6,6 @@ import { FirebaseContext } from '../../contexts/FirebaseContext.ts'
 import { getFirestore } from 'firebase/firestore'
 import { useBudgetActions } from '../../stores/budgetStore.ts'
 import { FirebaseAuthContext } from '../../contexts/FirebaseAuthContext.ts'
-import { randId } from './utils.ts'
-import { collection, addDoc } from 'firebase/firestore'
 import { showToast } from '../../utils/toast.ts'
 import { isMobile } from 'react-device-detect'
 
@@ -37,7 +35,7 @@ export default function CreateGroupDrawer (props: Props) {
   const app = useContext(FirebaseContext);
   const user = useContext(FirebaseAuthContext);
   const db = app ? getFirestore(app) : undefined;
-  const { addGroup, removeGroup, modifyGroup } = useBudgetActions();
+  const { addGroup } = useBudgetActions();
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -48,20 +46,10 @@ export default function CreateGroupDrawer (props: Props) {
         return;
       }
 
-      const tempId = randId();
       const name = inputRef.current?.value;
-      addGroup(tempId, name);
-
-      addDoc(collection(db, user.uid), {
-        title: name
-      }).then((obj) => {
-        showToast(toast,"Added group", "success");
-        modifyGroup(tempId, {
-          id: obj.id, title: name, transitioning: false, children: []
-        })
-      }).catch((error) => {
+      addGroup(name, db, user, () => {showToast(toast,"Group added", "success")}, (error) => {
+        // @ts-ignore
         showToast(toast, error.code, "error", error.message);
-        removeGroup(tempId);
       });
 
       props.onClose();

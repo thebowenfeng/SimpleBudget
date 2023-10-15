@@ -2,9 +2,9 @@ import styled from 'styled-components'
 import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
 import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
-import { GroupType, useBudgetActions } from '../stores/budgetStore.ts'
+import { useBudgetActions } from '../stores/budgetStore.ts'
 import { useContext, useEffect } from 'react'
-import { collection, getDocs, getFirestore, query } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore'
 import { FirebaseContext } from '../contexts/FirebaseContext.ts'
 import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
 import { useToast } from '@chakra-ui/react'
@@ -49,22 +49,14 @@ export default function Budget() {
 
   useEffect(() => {
     if (user && db) {
-      getDocs(query(collection(db, user.uid))).then((snapshot) => {
-        const newData: GroupType[] = []
-        snapshot.forEach((doc) => {
-          newData.push({
-            id: doc.id,
-            title: doc.data()["title"],
-            transitioning: false,
-            children: []
-          })
-        })
-        loadBudget(newData);
-      }).catch((error) => {
-        showToast(toast, error.code, "error");
+      loadBudget(db, user, () => {
+        showToast(toast, "Successfully loaded data", "success");
+      }, (error) => {
+        // @ts-ignore
+        showToast(toast, error.code, "error", error.message)
       })
     }
-  }, [])
+  }, [db, user])
 
   return (
     <RootContainer>

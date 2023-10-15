@@ -5,11 +5,12 @@ import React, {
   useRef,
   useState
 } from 'react'
-import { ArrowDownIcon, ArrowForwardIcon } from '@chakra-ui/icons'
+import { ArrowDownIcon, ArrowForwardIcon, AddIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
 import Category from './Category.tsx'
 import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
+import CreateBudgetDrawer from './CreateBudgetDrawer.tsx'
 
 interface Props {
   id: string,
@@ -69,6 +70,7 @@ function byId(id: string) {
 
 export default function Group(props: Props) {
   const [isFolded, setIsFolded] = useState<boolean>(false);
+  const [isCreate, setIsCreate] = useState<boolean>(false);
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const budgetState = useBudgetState()
   const { swapCategory } = useBudgetActions();
@@ -145,6 +147,8 @@ export default function Group(props: Props) {
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
                     onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : undefined} />}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
+        <IconButton aria-label={'add'} icon={<AddIcon />} variant={'link'}
+                    fontSize={isMobile ? '30px' : undefined} onClick={() => setIsCreate(true)}/>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
             <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>${props.available}</h1>
@@ -165,6 +169,7 @@ export default function Group(props: Props) {
         })}
         </ChildrenContainer>
       }
+      <CreateBudgetDrawer isOpen={isCreate} onClose={() => setIsCreate(false)} groupId={props.id} />
     </>
   )
 }

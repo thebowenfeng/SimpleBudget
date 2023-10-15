@@ -1,7 +1,7 @@
 import { useContext, useRef } from 'react'
 import { FirebaseContext } from '../../contexts/FirebaseContext.ts'
 import { FirebaseAuthContext } from '../../contexts/FirebaseAuthContext.ts'
-import { getFirestore, doc, deleteDoc } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore'
 import { useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import { Button, Heading, Select, useToast } from '@chakra-ui/react'
 import { showToast } from '../../utils/toast.ts'
@@ -35,7 +35,7 @@ export default function DeleteGroupDrawer(props: Props) {
   const app = useContext(FirebaseContext);
   const user = useContext(FirebaseAuthContext);
   const db = app ? getFirestore(app) : undefined;
-  const { addGroup, removeGroup } = useBudgetActions();
+  const { removeGroup } = useBudgetActions();
   const { state } = useBudgetState();
   const inputRef = useRef<HTMLSelectElement>(null);
   const toast = useToast();
@@ -48,16 +48,11 @@ export default function DeleteGroupDrawer(props: Props) {
       }
 
       const toRemove = state.filter((obj) => obj.id == inputRef.current?.value)[0];
-      removeGroup(toRemove.id);
-      // TODO: Delete budget subcollection
-      deleteDoc(doc(db, user.uid, toRemove.id)).then(() => {
-        showToast(toast, "Successfully deleted group", "success");
-      }).catch((error) => {
-        showToast(toast, error.code, "error", error.message);
-        addGroup(toRemove.id, toRemove.title);
-      })
+      removeGroup(toRemove.id, db, user,
+        () => {showToast(toast,"Successfully deleted group", "success")},
+        (error) => { // @ts-ignore
+          showToast(toast, error.code, "error", error.message)});
     }
-
     props.onClose();
   }
 

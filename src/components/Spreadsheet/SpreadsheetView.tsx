@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Button } from '@chakra-ui/react'
+import { Button, CircularProgress } from '@chakra-ui/react'
 import Group from './Group.tsx'
 import { isMobile } from 'react-device-detect'
 import React, { useState, useRef, useEffect } from 'react'
@@ -127,7 +127,7 @@ export default function SpreadsheetView() {
   }, [])
 
   return (
-    <>
+    <div style={{textAlign: 'center'}}>
       <ActionsBar>
         <Button variant={'link'} fontSize={isMobile ? '2.5rem' : undefined} onClick={() => setIsCreateGroup(true)}>Create group</Button>
         <Button sx={{marginLeft: 'auto'}} variant={'link'}
@@ -141,15 +141,16 @@ export default function SpreadsheetView() {
           <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}} id={"def"}>Assigned</h1>
         </LabelContainer>
       </LabelHeader>
-      <ViewContainer onMouseMove={onMouseMoveFn}>
+      {!budgetState.loading && <ViewContainer onMouseMove={onMouseMoveFn}>
         {budgetState.state.map((obj: GroupType) => {
           return (
             <Group key={obj.id} title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} />
           )
         })}
-      </ViewContainer>
+      </ViewContainer>}
+      {budgetState.loading && <CircularProgress isIndeterminate/>}
       <CreateGroupDrawer isOpen={isCreateGroup} onClose={() => {setIsCreateGroup(false)}}/>
       <DeleteGroupDrawer isOpen={isDeleteGroup} onClose={() => {setIsDeleteGroup(false)}} />
-    </>
+    </div>
   )
 }
