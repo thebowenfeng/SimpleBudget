@@ -11,6 +11,7 @@ import Category from './Category.tsx'
 import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
 import CreateBudgetDrawer from './CreateBudgetDrawer.tsx'
+import CreateGroupDrawer from './CreateGroupDrawer.tsx'
 
 interface Props {
   id: string,
@@ -36,6 +37,10 @@ const Header = styled.div`
   padding-right: 20px;
   padding-left: 20px;
   user-select: none;
+  &:hover {
+    background-color: rgb(166, 166, 166);
+    cursor: pointer;
+  }
 `
 
 export const LabelContainer = styled.div`
@@ -71,6 +76,7 @@ function byId(id: string) {
 export default function Group(props: Props) {
   const [isFolded, setIsFolded] = useState<boolean>(false);
   const [isCreate, setIsCreate] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const budgetState = useBudgetState()
   const { swapCategory } = useBudgetActions();
@@ -143,12 +149,15 @@ export default function Group(props: Props) {
 
   return(
     <>
-      <Header id={props.id}>
+      <Header id={props.id} onClick={() => setIsEdit(true)}>
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
                     onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : undefined} />}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
         <IconButton aria-label={'add'} icon={<AddIcon />} variant={'link'}
-                    fontSize={isMobile ? '30px' : undefined} onClick={() => setIsCreate(true)}/>
+                    fontSize={isMobile ? '30px' : undefined} onClick={(e) => {
+                      e.stopPropagation();
+                      setIsCreate(true)
+        }}/>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
             <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}}>${props.available}</h1>
@@ -170,6 +179,9 @@ export default function Group(props: Props) {
         </ChildrenContainer>
       }
       <CreateBudgetDrawer isOpen={isCreate} onClose={() => setIsCreate(false)} groupId={props.id} />
+      <CreateGroupDrawer isOpen={isEdit} onClose={() => setIsEdit(false)}
+                         data={budgetState.state.filter((obj) => obj.id == props.id)[0]}
+                         title={"Edit group"}/>
     </>
   )
 }

@@ -25,6 +25,7 @@ const Container = styled.div`
   padding-right: 10px;
   row-gap: 20px;
   z-index: 50;
+  overflow-y: auto;
 `
 
 const TitleContainer = styled.div`
@@ -140,7 +141,12 @@ export default function CreateBudgetDrawer(props: Props) {
                    sx={{fontSize: isMobile ? "2rem" : undefined}} height={isMobile ? "80px" : undefined}/>
           </InputGroup>
         </div>
-        <Button sx={{marginTop: "20px", fontSize: isMobile? "2rem" : undefined, height: isMobile ? '100px' : undefined}}
+        <Button sx={{
+          marginTop: "20px",
+          fontSize: isMobile? "2rem" : undefined,
+          height: isMobile ? '100px' : undefined,
+          minHeight: isMobile ? '100px' : "var(--chakra-sizes-10)"
+        }}
                 onClick={onSubmit}>Submit</Button>
       </Container>
     </Drawer>
