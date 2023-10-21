@@ -8,10 +8,17 @@ import {
   ModalOverlay,
   IconButton
 } from '@chakra-ui/react'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
 import { getTheme } from '../themes/theme.ts'
+
+interface Props {
+  month: number,
+  year: number,
+  setMonth: Dispatch<SetStateAction<number>>,
+  setYear: Dispatch<SetStateAction<number>>
+}
 
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
 
@@ -19,16 +26,14 @@ const renderMonthYear = (month: number, year: number): string => {
   return `${months[month]} - ${year.toString()}`
 }
 
-export default function MonthPicker() {
+export default function MonthPicker(props: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [year, setYear] = useState<number>(new Date().getFullYear())
-  const [month, setMonth] = useState<number>(new Date().getMonth())
 
   const forward = () => {
-    setMonth((prev) => {
+    props.setMonth((prev) => {
       switch (prev){
         case 11:
-          setYear((prev2) => {
+          props.setYear((prev2) => {
             return prev2 + 1
           })
           return 0
@@ -39,10 +44,10 @@ export default function MonthPicker() {
   }
 
   const backward = () => {
-    setMonth((prev) => {
+    props.setMonth((prev) => {
       switch (prev){
         case 0:
-          setYear((prev2) => {
+          props.setYear((prev2) => {
             return prev2 - 1
           })
           return 11
@@ -61,7 +66,7 @@ export default function MonthPicker() {
       <Button variant={'ghost'} size={'lg'} fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
               onClick={() => setIsOpen(true)} color={getTheme().light.fontColor}
               _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
-      >{renderMonthYear(month, year)}</Button>
+      >{renderMonthYear(props.month, props.year)}</Button>
       <IconButton aria-label={'forward'} icon={<ArrowForwardIcon />} fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-md);'}
                   variant={'ghost'} onClick={forward} color={getTheme().light.buttonTheme.fontColor}
                   _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
@@ -74,15 +79,15 @@ export default function MonthPicker() {
             fontSize: isMobile ? '3rem' : 'var(--chakra-fontSizes-xl);',
           }}>
             <IconButton aria-label={'back'} icon={<ArrowBackIcon />} variant={'ghost'} onClick={
-              () => setYear((curr) => curr - 1)
+              () => props.setYear((curr) => curr - 1)
             }
                         fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
                         color={getTheme().light.buttonTheme.fontColor}
                         _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
             />
-            {year}
+            {props.year}
             <IconButton aria-label={'forward'} icon={<ArrowForwardIcon />} variant={'ghost'} onClick={
-              () => setYear((curr) => curr + 1)
+              () => props.setYear((curr) => curr + 1)
             }
                         fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
                         color={getTheme().light.buttonTheme.fontColor}
@@ -98,7 +103,7 @@ export default function MonthPicker() {
           }}>
             {months.map((month) => {
               return(<Button width={'30%'} height={isMobile ? '100px' : undefined} fontSize={isMobile ? '2rem' : undefined} onClick={() => {
-                setMonth(months.indexOf(month))
+                props.setMonth(months.indexOf(month))
                 setIsOpen(false)
               }}
                              bg={getTheme().light.buttonTheme.backgroundColor}

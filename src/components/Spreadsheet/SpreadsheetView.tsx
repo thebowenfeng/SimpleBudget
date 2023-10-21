@@ -2,12 +2,17 @@ import styled from 'styled-components'
 import { Button, CircularProgress } from '@chakra-ui/react'
 import Group from './Group.tsx'
 import { isMobile } from 'react-device-detect'
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { GroupType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
 import DeleteGroupDrawer from './DeleteGroupDrawer.tsx'
 import { getTheme } from '../../themes/theme.ts'
+
+interface Props {
+  month: number,
+  year: number,
+}
 
 interface DragState {
   isMouseDown: boolean;
@@ -62,13 +67,18 @@ function byId(id: string) {
   return document.getElementById(id)
 }
 
-export default function SpreadsheetView() {
+export default function SpreadsheetView(props: Props) {
   const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const [displayChild, setDisplayChild] = useState<boolean>(true);
   const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false);
   const [isDeleteGroup, setIsDeleteGroup] = useState<boolean>(false);
-  const budgetState = useBudgetState()
-  const { swapGroup } = useBudgetActions()
+  const budgetState = useBudgetState();
+  const { swapGroup } = useBudgetActions();
+
+  const disableEditing = useMemo<boolean>(() => {
+    const currDate = new Date();
+    return (currDate.getMonth() > props.month && currDate.getFullYear() == props.year) || currDate.getFullYear() > props.year
+  }, [props.year, props.month])
 
   const onMouseUp =(event: MouseEvent) => {
     event.stopPropagation()
@@ -148,13 +158,25 @@ export default function SpreadsheetView() {
           <h1 style={{fontSize: isMobile ? '1.75rem' : undefined}} id={"def"}>Assigned</h1>
         </LabelContainer>
       </LabelHeader>
-      {!budgetState.loading && <ViewContainer onMouseMove={onMouseMoveFn}>
-        {budgetState.state.map((obj: GroupType) => {
-          return (
-            <Group key={obj.id} title={obj.title} assigned={100} available={80} id={obj.id} displayChild={displayChild} />
-          )
-        })}
-      </ViewContainer>}
+      <div style={{ cursor: disableEditing ? "not-allowed" : undefined }}>
+        {!budgetState.loading && <ViewContainer onMouseMove={onMouseMoveFn} style={{ pointerEvents: disableEditing ? "none" : undefined }}>
+          {budgetState.state.map((obj: GroupType) => {
+            let assigned = 0;
+            let available = 0;
+            for (const child of obj.children) {
+              const currData = child.data.filter((obj2) => obj2.month == props.month && obj2.year == props.year);
+              if (currData.length == 1) {
+                assigned += currData[0].assigned;
+                available += currData[0].available;
+              }
+            }
+            return (
+              <Group key={obj.id} title={obj.title} assigned={assigned} available={available} id={obj.id} displayChild={displayChild}
+                     month={props.month} year={props.year} isDisabled={disableEditing} />
+            )
+          })}
+        </ViewContainer>}
+      </div>
       {budgetState.loading && <CircularProgress isIndeterminate/>}
       <CreateGroupDrawer isOpen={isCreateGroup} onClose={() => {setIsCreateGroup(false)}}/>
       <DeleteGroupDrawer isOpen={isDeleteGroup} onClose={() => {setIsDeleteGroup(false)}} />

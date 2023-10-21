@@ -1,7 +1,14 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
 import '../components/Spreadsheet/Animation.css'
-import { Firestore, addDoc, collection, doc, deleteDoc, getDocs, query, where, updateDoc } from 'firebase/firestore'
+import { Firestore, addDoc, collection, doc, deleteDoc, getDocs, query, where, updateDoc, arrayUnion } from 'firebase/firestore'
 import { User } from 'firebase/auth'
+
+interface MonthlyData {
+  month: number,
+  year: number,
+  assigned: number,
+  available: number,
+}
 
 export interface CategoryType {
   title: string;
@@ -11,6 +18,7 @@ export interface CategoryType {
   frequency: "daily" | "weekly" | "monthly" | "yearly";
   amount: number;
   rawAmount: number;
+  data: MonthlyData[]
 }
 
 export interface GroupType {
@@ -94,7 +102,8 @@ export const actions = {
                 type: obj.data()["type"],
                 frequency: obj.data()["frequency"],
                 amount: obj.data()["amount"],
-                rawAmount: obj.data()["rawAmount"]
+                rawAmount: obj.data()["rawAmount"],
+                data: obj.data()["data"]
               }
             })
           });
@@ -263,6 +272,61 @@ export const actions = {
           setState({state: [...getState().state]})
         })
       }
+    },
+  addDefaultMonthlyData: (month: number, year: number, db: Firestore, user: User, onError: (error: never) => void): Action<BudgetState> =>
+    ({setState, getState}) => {
+      const newState = [...getState().state];
+      for (const group of newState) {
+        for (const budget of group.children) {
+          if (budget.data.filter((obj) => obj.month == month && obj.year == year).length == 0) {
+            let prevMonth = month - 1;
+            let prevYear = year;
+            if (prevMonth == -1) {
+              prevMonth = 11;
+              prevYear -= 1;
+            }
+
+            let prevAvail = 0;
+            if (budget.data.filter((obj) => obj.month == prevMonth && obj.year == prevYear).length != 0) {
+              prevAvail += budget.data.filter((obj) => obj.month == prevMonth && obj.year == prevYear)[0].available;
+            }
+
+            budget.data = [...budget.data, {month: month, year: year, assigned: 0, available: prevAvail}];
+            setState({state: newState});
+
+            updateDoc(doc(db, user.uid, group.id, "categories", budget.id),
+              {data: arrayUnion({month: month, year: year, assigned: 0, available: prevAvail})}).catch((error) => {
+              onError(error as never);
+              budget.data = budget.data.filter((obj) => !(obj.month == month && obj.year == year));
+              setState({state: [...newState]});
+            })
+          }
+        }
+      }
+    },
+  editBudget: (data: CategoryType, categoryId: string, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+    ({setState, getState}) => {
+      const newState = [...getState().state];
+      const group = newState.filter((obj) => obj.id == groupId)[0];
+      const ind = getIndex(categoryId, group.children);
+      const oldCategory = group.children[ind];
+      group.children.splice(ind, 1, data);
+      setState({state: newState});
+
+      updateDoc(doc(db, user.uid, groupId, "categories", categoryId), {
+        title: data.title,
+        type: data.type,
+        frequency: data.frequency,
+        amount: data.amount,
+        rawAmount: data.rawAmount,
+        data: data.data
+      }).then(() => {
+        onSuccess();
+      }).catch((error) => {
+        onError(error as never);
+        group.children.splice(ind, 1, oldCategory);
+        setState({state: [...newState]});
+      })
     }
 }
 

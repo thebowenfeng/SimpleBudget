@@ -19,7 +19,10 @@ interface Props {
   title: string,
   assigned: number,
   available: number,
-  displayChild: boolean
+  displayChild: boolean,
+  month: number,
+  year: number,
+  isDisabled: boolean,
 }
 
 interface DragState {
@@ -150,14 +153,17 @@ export default function Group(props: Props) {
 
   return(
     <>
-      <Header id={props.id} onClick={() => setIsEdit(true)}>
+      <Header id={props.id} onClick={() => !props.isDisabled && setIsEdit(true)}>
         {props.displayChild && <IconButton aria-label={'fold'} icon={isFolded ? <ArrowForwardIcon /> : <ArrowDownIcon />}
-                    onClick={() => {setIsFolded(!isFolded)}} variant={'link'} fontSize={isMobile ? '30px' : undefined} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsFolded(!isFolded)
+                    }} variant={'link'} fontSize={isMobile ? '30px' : undefined} />}
         <Heading fontSize={isMobile ? '30px' : '20px'}>{props.title}</Heading>
         <IconButton aria-label={'add'} icon={<AddIcon />} variant={'link'}
                     fontSize={isMobile ? '30px' : undefined} onClick={(e) => {
                       e.stopPropagation();
-                      setIsCreate(true)
+                      !props.isDisabled && setIsCreate(true);
         }}/>
         <div style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
           <LabelContainer>
@@ -175,11 +181,20 @@ export default function Group(props: Props) {
                           }}
                           onMouseMove={onMouseMoveFn}>
         {getChildren(props.id, budgetState).map((obj) => {
-          return (<Category title={obj.title} id={obj.id} key={obj.id}/>)
+          const currData = obj.data.filter((obj2) => obj2.year == props.year && obj2.month == props.month);
+          let assigned = 0;
+          let available = 0;
+          if (currData.length == 1) {
+            assigned = currData[0].assigned;
+            available = currData[0].available;
+          }
+          return (<Category title={obj.title} id={obj.id} key={obj.id} month={props.month} year={props.year}
+                            assigned={assigned} available={available} groupId={props.id} isDisabled={props.isDisabled}/>)
         })}
         </ChildrenContainer>
       }
-      <CreateBudgetDrawer isOpen={isCreate} onClose={() => setIsCreate(false)} groupId={props.id} />
+      <CreateBudgetDrawer isOpen={isCreate} onClose={() => setIsCreate(false)} groupId={props.id}
+                          month={props.month} year={props.year} />
       <CreateGroupDrawer isOpen={isEdit} onClose={() => setIsEdit(false)}
                          data={budgetState.state.filter((obj) => obj.id == props.id)[0]}
                          title={"Edit group"}/>

@@ -3,7 +3,7 @@ import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
 import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
 import { useBudgetActions } from '../stores/budgetStore.ts'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { getFirestore } from 'firebase/firestore'
 import { FirebaseContext } from '../contexts/FirebaseContext.ts'
 import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
@@ -41,11 +41,13 @@ const Body = styled.div`
 `
 
 export default function Budget() {
-  const { loadBudget } = useBudgetActions();
+  const { loadBudget, addDefaultMonthlyData } = useBudgetActions();
   const app = useContext(FirebaseContext);
   const user = useContext(FirebaseAuthContext);
   const db = app ? getFirestore(app) : undefined;
   const toast = useToast();
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [month, setMonth] = useState<number>(new Date().getMonth());
 
   useEffect(() => {
     if (user && db) {
@@ -56,20 +58,31 @@ export default function Budget() {
         showToast(toast, error.code, "error", error.message)
       })
     }
-  })
+    // eslint-disable-next-line
+  }, [])
+
+  useEffect(() => {
+    if (user && db) {
+      addDefaultMonthlyData(month, year, db, user, (error) => {
+        // @ts-ignore
+        showToast(toast, error.code, "error", error.message)
+      })
+    }
+    // eslint-disable-next-line
+  }, [month, year])
 
   return (
     <RootContainer>
       <Header>
         <HeaderContainer>
-          <MonthPicker />
+          <MonthPicker year={year} month={month} setMonth={setMonth} setYear={setYear}/>
         </HeaderContainer>
         <HeaderContainer>
           <h1>Money</h1>
         </HeaderContainer>
       </Header>
       <Body>
-        <SpreadsheetView />
+        <SpreadsheetView month={month} year={year}/>
       </Body>
     </RootContainer>
   )
