@@ -3548,7 +3548,7 @@ This typically indicates that your device does not have a healthy Internet conne
     background-color: white;
     z-index: 20;
     animation: ${Zle} 1s ease;
-  `,r=()=>M?w.jsx(n,{children:t.children}):w.jsx(e,{children:t.children});return w.jsxs(w.Fragment,{children:[t.isOpen&&w.jsx(Xle,{onClick:t.onClose}),t.isOpen&&w.jsx(r,{})]})}function eue(){return Math.random().toString(36).replace(/[^a-z]+/g,"").substr(2,10)}const tue=be.div`
+  `,r=()=>M?w.jsx(n,{children:t.children}):w.jsx(e,{children:t.children});return w.jsxs(w.Fragment,{children:[t.isOpen&&w.jsx(Xle,{onClick:t.onClose,onMouseMove:i=>{i.stopPropagation()},onMouseDown:i=>{i.stopPropagation()}}),t.isOpen&&w.jsx(r,{})]})}function eue(){return Math.random().toString(36).replace(/[^a-z]+/g,"").substr(2,10)}const tue=be.div`
   width: 100%;
   height: 100%;
   display: flex;
