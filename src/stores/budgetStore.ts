@@ -143,7 +143,6 @@ export const actions = {
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {
-      console.log(item1.title, item1.transitioning, item2.title, item2.transitioning);
       if (!item1.transitioning && !item2.transitioning) {
         item1.transitioning = true;
         item2.transitioning = true;
