@@ -75,7 +75,10 @@ export default function Drawer(props: Props) {
 
   return (
     <>
-      {props.isOpen && <DrawerOverlay onClick={props.onClose} />}
+      {props.isOpen && <DrawerOverlay onClick={props.onClose}
+                                      onMouseMove={(e) => {e.stopPropagation()}}
+                                      onMouseDown={(e) => {e.stopPropagation()}}
+      />}
       {props.isOpen && <RenderDrawer />}
     </>
   )
