@@ -65,11 +65,11 @@ function addAnimation(index1: number, index2: number, id1: string, id2: string) 
 
 function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | CategoryType) {
   if (document.getElementById(item1.id) && document.getElementById(item2.id)) {
-    document.getElementById(item1.id)?.style.removeProperty('animation')
-    document.getElementById(item2.id)?.style.removeProperty('animation')
-    item1.transitioning = false;
-    item2.transitioning = false;
+    document.getElementById(item1.id)?.style.removeProperty('animation');
+    document.getElementById(item2.id)?.style.removeProperty('animation');
   }
+  item1.transitioning = false;
+  item2.transitioning = false;
 }
 
 export function randId() {
@@ -143,6 +143,7 @@ export const actions = {
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {
+      console.log(item1.title, item1.transitioning, item2.title, item2.transitioning);
       if (!item1.transitioning && !item2.transitioning) {
         item1.transitioning = true;
         item2.transitioning = true;
@@ -164,6 +165,9 @@ export const actions = {
             removeAnimation(item1, item2);
             setState({ state: newState })
           }, 250);
+        } else {
+          item1.transitioning = false;
+          item2.transitioning = false;
         }
       }
     },
