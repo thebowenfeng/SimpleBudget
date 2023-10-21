@@ -7,6 +7,7 @@ import { GroupType, useBudgetActions, useBudgetState } from '../../stores/budget
 import './Animation.css'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
 import DeleteGroupDrawer from './DeleteGroupDrawer.tsx'
+import { getTheme } from '../../themes/theme.ts'
 
 interface DragState {
   isMouseDown: boolean;
@@ -129,9 +130,15 @@ export default function SpreadsheetView() {
   return (
     <div style={{textAlign: 'center'}}>
       <ActionsBar>
-        <Button variant={'link'} fontSize={isMobile ? '2.5rem' : undefined} onClick={() => setIsCreateGroup(true)}>Create group</Button>
+        <Button variant={'link'} fontSize={isMobile ? '2.5rem' : undefined}
+                onClick={() => setIsCreateGroup(true)}
+                color={getTheme().light.buttonTheme.fontColor}
+        >Create group</Button>
         <Button sx={{marginLeft: 'auto'}} variant={'link'}
-                fontSize={isMobile ? '2.5rem' : undefined} onClick={() => setIsDeleteGroup(true)}>Delete group</Button>
+                fontSize={isMobile ? '2.5rem' : undefined}
+                onClick={() => setIsDeleteGroup(true)}
+                color={getTheme().light.buttonTheme.fontColor}
+        >Delete group</Button>
       </ActionsBar>
       <LabelHeader>
         <LabelContainer>

@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { navBarItems } from './config.tsx'
 import { Heading, IconButton } from '@chakra-ui/react'
+import { getTheme } from '../../themes/theme.ts'
 
 const RootContainer = styled.div`
   width: 100vw;
@@ -13,6 +14,7 @@ const RootContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   z-index: 10;
+  background-color: ${getTheme().dark.backgroundColor};
 `
 
 const NavBarEntryContainer = styled.div`
@@ -20,6 +22,7 @@ const NavBarEntryContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: ${Math.round(100 / navBarItems.length) + 'vw'};
+  color: ${getTheme().dark.fontColor}
 `
 export default function NavBarMobile() {
   return(
@@ -28,7 +31,9 @@ export default function NavBarMobile() {
         return (
           <NavBarEntryContainer>
             <IconButton aria-label={obj.title} icon={obj.icon} variant={'ghost'}
-                        height={'100px'} width={'100px'} fontSize={'100px'}/>
+                        height={'100px'} width={'100px'} fontSize={'100px'}
+                        color={getTheme().dark.fontColor} _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
+            />
             <Heading>{obj.title}</Heading>
           </NavBarEntryContainer>
         )

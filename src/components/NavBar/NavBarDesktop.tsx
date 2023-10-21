@@ -4,6 +4,7 @@ import { Button, IconButton, Heading } from '@chakra-ui/react'
 import { Icon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { BsFillBootstrapFill } from 'react-icons/bs'
 import { navBarItems } from './config.tsx'
+import { getTheme } from '../../themes/theme.ts'
 
 interface NavBarEntryProps {
   label: string,
@@ -20,6 +21,7 @@ const RootWrapper = styled.div`
   padding-top: 10px;
   justify-content: center;
   align-items: center;
+  background-color: ${getTheme().dark.backgroundColor};
 `
 
 const slideRight = keyframes`
@@ -31,34 +33,46 @@ const slideRight = keyframes`
   }
 `
 
+const HeadingWrapper = styled.div`
+  width: 180px;
+  text-align: center;
+  animation: ${slideRight} 1s ease;
+`
+
 export default function NavBarDesktop() {
   const [expand, setExpand] = useState<boolean>(false)
 
   const NarBarEntry = (props: NavBarEntryProps) => {
     return (
       <>
-        {!expand && <IconButton aria-label={props.label} icon={props.icon} variant={"ghost"} />}
-        {expand && <Button variant={"ghost"}>{props.icon}{props.label}</Button>}
+        {!expand && <IconButton aria-label={props.label} icon={props.icon} variant={"ghost"}
+                                color={getTheme().dark.buttonTheme.fontColor}
+                                bg={getTheme().dark.buttonTheme.backgroundColor}
+                                _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
+        />}
+        {expand && <Button variant={"ghost"}
+                           color={getTheme().dark.buttonTheme.fontColor}
+                           bg={getTheme().dark.buttonTheme.backgroundColor}
+                           _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
+                           sx={{minWidth: "80%"}}
+        >{props.icon}{props.label}</Button>}
       </>
     )
   }
 
   const AppTitle = () => {
-    const HeadingWrapper = styled.div`
-      width: 180px;
-      text-align: center;
-      animation: ${slideRight} 1s ease
-    `
     return (
       <HeadingWrapper>
-        <Heading fontSize={'1.5rem'} sx={{marginBottom: '10px'}}>Simple Budget</Heading>
+        <Heading fontSize={'1.5rem'} sx={{marginBottom: '10px'}} color={getTheme().dark.fontColor}>Simple Budget</Heading>
       </HeadingWrapper>
     )
   }
 
   return (
     <RootWrapper style={{width: expand ? '180px' : '80px'}}>
-      {!expand && <Icon boxSize={30} as={BsFillBootstrapFill} sx={{marginBottom: '10px'}}/>}
+      {!expand && <Icon boxSize={30} as={BsFillBootstrapFill} sx={{marginBottom: '10px'}}
+                        color={getTheme().dark.fontColor}
+      />}
       {expand && <AppTitle />}
       {navBarItems.map((obj) => {
         return(
@@ -67,7 +81,8 @@ export default function NavBarDesktop() {
       })}
       <IconButton icon={expand ? <ArrowLeftIcon /> : <ArrowRightIcon />} onClick={() => {setExpand(!expand)}}
                   sx={{ marginTop: 'auto', marginBottom: '10px' }} aria-label={"Expand"}
-                  variant={'ghost'}
+                  variant={'ghost'} color={getTheme().dark.fontColor} bg={getTheme().dark.buttonTheme.backgroundColor}
+                  _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
       />
     </RootWrapper>
   )

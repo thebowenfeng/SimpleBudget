@@ -12,6 +12,7 @@ import { BudgetState, CategoryType, useBudgetActions, useBudgetState } from '../
 import './Animation.css'
 import CreateBudgetDrawer from './CreateBudgetDrawer.tsx'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
+import { getTheme } from '../../themes/theme.ts'
 
 interface Props {
   id: string,
@@ -33,12 +34,12 @@ const Header = styled.div`
   min-height: ${isMobile ? '80px' : '40px'};
   width: 100%;
   align-items: center;
-  background-color: rgba(215, 215, 215, 1);
+  background-color: ${getTheme().header.backgroundColor};
   padding-right: 20px;
   padding-left: 20px;
   user-select: none;
   &:hover {
-    background-color: rgb(166, 166, 166);
+    background-color: ${getTheme().header.hoverColor};
     cursor: pointer;
   }
 `

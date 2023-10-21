@@ -11,6 +11,7 @@ import {
 import { useState } from 'react'
 import { ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
+import { getTheme } from '../themes/theme.ts'
 
 const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
 
@@ -54,11 +55,17 @@ export default function MonthPicker() {
   return (
     <>
       <IconButton aria-label={'back'} icon={<ArrowBackIcon />} fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-md);'}
-                  variant={'ghost'} onClick={backward}/>
+                  variant={'ghost'} onClick={backward} color={getTheme().light.buttonTheme.fontColor}
+                  _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
+      />
       <Button variant={'ghost'} size={'lg'} fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
-              onClick={() => setIsOpen(true)}>{renderMonthYear(month, year)}</Button>
+              onClick={() => setIsOpen(true)} color={getTheme().light.fontColor}
+              _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
+      >{renderMonthYear(month, year)}</Button>
       <IconButton aria-label={'forward'} icon={<ArrowForwardIcon />} fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-md);'}
-                  variant={'ghost'} onClick={forward}/>
+                  variant={'ghost'} onClick={forward} color={getTheme().light.buttonTheme.fontColor}
+                  _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
+      />
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} isCentered size={'xl'}>
         <ModalOverlay />
         <ModalContent height={isMobile ? '30vh' : undefined} maxW={isMobile ? '80vw' : undefined}>
@@ -68,13 +75,23 @@ export default function MonthPicker() {
           }}>
             <IconButton aria-label={'back'} icon={<ArrowBackIcon />} variant={'ghost'} onClick={
               () => setYear((curr) => curr - 1)
-            } fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}/>
+            }
+                        fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
+                        color={getTheme().light.buttonTheme.fontColor}
+                        _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
+            />
             {year}
             <IconButton aria-label={'forward'} icon={<ArrowForwardIcon />} variant={'ghost'} onClick={
               () => setYear((curr) => curr + 1)
-            } fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}/>
+            }
+                        fontSize={isMobile ? '3rem' : 'var(--chakra-fontSizes-lg);'}
+                        color={getTheme().light.buttonTheme.fontColor}
+                        _hover={{bg: getTheme().light.buttonTheme.hoverColor}}/>
           </ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton bg={getTheme().light.backgroundColor}
+                            color={getTheme().light.fontColor}
+                            _hover={{bg: getTheme().light.buttonTheme.hoverColor}}
+          />
           <ModalBody sx={{
             display: 'flex', flexDirection: 'row', flexWrap: 'wrap', columnGap: '10px',
             justifyContent: 'center', rowGap: '20px', marginBottom: '20px'
@@ -83,7 +100,10 @@ export default function MonthPicker() {
               return(<Button width={'30%'} height={isMobile ? '100px' : undefined} fontSize={isMobile ? '2rem' : undefined} onClick={() => {
                 setMonth(months.indexOf(month))
                 setIsOpen(false)
-              }}>{month}</Button>)
+              }}
+                             bg={getTheme().light.buttonTheme.backgroundColor}
+                             color={getTheme().light.fontColor}
+                             _hover={{bg: getTheme().light.buttonTheme.hoverColor}}>{month}</Button>)
             })}
           </ModalBody>
         </ModalContent>

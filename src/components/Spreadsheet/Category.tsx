@@ -4,6 +4,7 @@ import { LabelContainer } from './Group.tsx'
 import { Progress } from '@chakra-ui/react'
 import { useState } from 'react'
 import DeleteBudgetPopover from './DeleteBudgetPopover.tsx'
+import { getTheme } from '../../themes/theme.ts'
 
 interface Props {
   id: string;
@@ -29,8 +30,9 @@ const RootContainer = styled.div`
   padding-left: 55px;
   user-select: none;
   transition: top 1s linear;
+  background-color: ${getTheme().light.backgroundColor};
   &:hover {
-    background-color: #eaeaea;
+    background-color: ${getTheme().light.hoverColor};
     cursor: pointer;
   }
 `

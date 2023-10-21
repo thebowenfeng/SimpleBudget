@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { isMobile } from 'react-device-detect'
 import { showToast } from '../utils/toast.ts'
+import { getTheme } from '../themes/theme.ts'
 
 const RootWrapper = styled.div`
   height: 100vh;
@@ -25,6 +26,8 @@ const LoginWrapper = styled.div`
   border: 1px solid #b4b3b3;
   padding: 50px;
   border-radius: 30px;
+  background-color: ${getTheme().light.backgroundColor};
+  color: ${getTheme().light.fontColor};
 `
 
 export default function Login() {
@@ -62,7 +65,10 @@ export default function Login() {
         <h1 style={{fontSize: isMobile ? "5em" : "2em"}}>Login</h1>
         <Input placeholder={"Email"} size={"lg"} ref={emailRef}
                height={isMobile ? "80px" : 'var(--input-height)'}
-               sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}/>
+               sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}
+               bg={"white"}
+               _focus={{borderColor: getTheme().light.hoverColor}}
+        />
         <InputGroup size='md'>
           <Input
             size={'lg'}
@@ -71,9 +77,15 @@ export default function Login() {
             ref={pswdRef}
             height={isMobile ? "80px" : 'var(--input-height)'}
             sx={{ fontSize: isMobile ? "2.5rem" : "--input-font-size" }}
+            bg={"white"}
+            _focus={{borderColor: getTheme().light.hoverColor}}
           />
           <InputRightElement width='4.5rem' top={isMobile ? '20px' : '4px'}>
-            <Button h={isMobile ? '4rem' : '2rem'} size={isMobile ? 'lg' : 'sm'} onClick={() => {setShow((prev) => !prev)}}>
+            <Button h={isMobile ? '4rem' : '2rem'} size={isMobile ? 'lg' : 'sm'}
+                    onClick={() => {setShow((prev) => !prev)}}
+                    bg={getTheme().light.buttonTheme.backgroundColor}
+                    color={getTheme().light.buttonTheme.fontColor}
+            >
               {show ? 'Hide' : 'Show'}
             </Button>
           </InputRightElement>
@@ -83,7 +95,10 @@ export default function Login() {
                   height: isMobile ? "100px" : "var(--chakra-sizes-12)",
                   width: isMobile ? "200px" : "var(--chakra-sizes-20)",
                   fontSize: isMobile ? "3rem" : "var(--chakra-fontSizes-lg)"
-        }}>Login</Button>
+                }}
+                bg={getTheme().light.buttonTheme.backgroundColor}
+                color={getTheme().light.buttonTheme.fontColor}
+        >Login</Button>
       </LoginWrapper>
     </RootWrapper>
   )
