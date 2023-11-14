@@ -123,23 +123,15 @@ export const actions = {
   },
   swapGroup: (item1: GroupType, item2: GroupType): Action<BudgetState> =>
     ({setState, getState}) => {
-      if (!item1.transitioning && !item2.transitioning) {
-        item1.transitioning = true;
-        item2.transitioning = true;
-        const newState = [...getState().state]
-        const index1 = getIndex(item1.id, newState);
-        const index2 = getIndex(item2.id, newState);
+      const newState = [...getState().state]
+      const index1 = getIndex(item1.id, newState);
+      const index2 = getIndex(item2.id, newState);
 
-        addAnimation(index1, index2, item1.id, item2.id);
+      addAnimation(index1, index2, item1.id, item2.id);
 
-        newState[index1] = item2;
-        newState[index2] = item1;
-
-        setTimeout(() => {
-          removeAnimation(item1, item2);
-          setState({ state: newState })
-        }, 250);
-      }
+      newState[index1] = item2;
+      newState[index2] = item1;
+      setState({ state: newState });
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {

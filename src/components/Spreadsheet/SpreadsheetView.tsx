@@ -2,21 +2,17 @@ import styled from 'styled-components'
 import { Button, CircularProgress } from '@chakra-ui/react'
 import Group from './Group.tsx'
 import { isMobile } from 'react-device-detect'
-import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { GroupType, useBudgetActions, useBudgetState } from '../../stores/budgetStore.ts'
 import './Animation.css'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
 import DeleteGroupDrawer from './DeleteGroupDrawer.tsx'
 import { getTheme } from '../../themes/theme.ts'
+import Swappable from "../Swappable.tsx";
 
 interface Props {
   month: number,
   year: number,
-}
-
-interface DragState {
-  isMouseDown: boolean;
-  draggedItem: GroupType | null;
 }
 
 const ActionsBar = styled.div`
@@ -63,12 +59,7 @@ const LabelContainer = styled.div`
   height: 100%;
 `
 
-function byId(id: string) {
-  return document.getElementById(id)
-}
-
 export default function SpreadsheetView(props: Props) {
-  const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const [displayChild, setDisplayChild] = useState<boolean>(true);
   const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false);
   const [isDeleteGroup, setIsDeleteGroup] = useState<boolean>(false);
@@ -78,64 +69,15 @@ export default function SpreadsheetView(props: Props) {
   const disableEditing = useMemo<boolean>(() => {
     const currDate = new Date();
     return (currDate.getMonth() > props.month && currDate.getFullYear() == props.year) || currDate.getFullYear() > props.year
-  }, [props.year, props.month])
+  }, [props.year, props.month]);
 
-  const onMouseUp =(event: MouseEvent) => {
-    event.stopPropagation()
-    setDisplayChild(true);
-    dragState.current.isMouseDown = false;
-    if (dragState.current.draggedItem) {
-      byId(dragState.current.draggedItem.id)?.style.removeProperty('border')
-    }
-    dragState.current.draggedItem = null;
-  }
-
-  const onMouseDown =(event: MouseEvent) => {
-    event.stopPropagation()
-    dragState.current.isMouseDown = true;
-  }
-
-  const onMouseMoveFn = (event: React.MouseEvent) => {
-    event.stopPropagation()
-    if (dragState.current.isMouseDown) {
-      setDisplayChild(false);
-      if (!dragState.current.draggedItem) {
-        for (const groupItem of budgetState.state) {
-          if (byId(groupItem.id) && byId(groupItem.id)?.matches(":hover")) {
-            dragState.current.draggedItem = groupItem;
-            break;
-          }
-        }
-      }
-
-      if (dragState.current.draggedItem) {
-        // @ts-ignore
-        byId(dragState.current.draggedItem.id).style.border = "2px solid blue";
-
-        for (const group of budgetState.state) {
-          if (byId(group.id)?.matches(":hover") && group.id != dragState.current.draggedItem.id) {
-            swapGroup(group, dragState.current.draggedItem);
-          }
-        }
-
-        for (const group of budgetState.state) {
-          if (group.id != dragState.current.draggedItem.id) {
-            byId(group.id)?.style.removeProperty('border');
-          }
-        }
+  const getGroupObject = (id: string) => {
+    for (const child of budgetState.state) {
+      if (child.id == id) {
+        return child;
       }
     }
   }
-
-  useEffect(() => {
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mouseup", onMouseUp);
-
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
-  }, [])
 
   return (
     <div style={{textAlign: 'center'}}>
@@ -159,22 +101,54 @@ export default function SpreadsheetView(props: Props) {
         </LabelContainer>
       </LabelHeader>
       <div style={{ cursor: disableEditing ? "not-allowed" : undefined }}>
-        {!budgetState.loading && <ViewContainer onMouseMove={onMouseMoveFn} style={{ pointerEvents: disableEditing ? "none" : undefined }}>
-          {budgetState.state.map((obj: GroupType) => {
-            let assigned = 0;
-            let available = 0;
-            for (const child of obj.children) {
-              const currData = child.data.filter((obj2) => obj2.month == props.month && obj2.year == props.year);
-              if (currData.length == 1) {
-                assigned += currData[0].assigned;
-                available += currData[0].available;
+        {!budgetState.loading && <ViewContainer style={{ pointerEvents: disableEditing ? "none" : undefined }}>
+          <Swappable onDrag={() => setDisplayChild(false)} onDragStop={() => setDisplayChild(true)}
+                     onSwap={(id1, id2) => {
+                       const obj1 = getGroupObject(id1);
+                       const obj2 = getGroupObject(id2);
+
+                       if (obj1 && obj2) {
+                         obj1.transitioning = true;
+                         obj2.transitioning = true;
+                         swapGroup(obj1, obj2);
+                       }
+                     }}
+                     isSwapping={(id1, id2) => {
+                       const obj1 = getGroupObject(id1);
+                       const obj2 = getGroupObject(id2);
+
+                       if (obj1 && obj2 && !obj1.transitioning && !obj2.transitioning) {
+                         return true;
+                       } else {
+                         return false;
+                       }
+                     }}
+                     onSwapEnd={(id1, id2) => {
+                       const obj1 = getGroupObject(id1);
+                       const obj2 = getGroupObject(id2);
+
+                       if (obj1 && obj2) {
+                         obj1.transitioning = false;
+                         obj2.transitioning = false;
+                       }
+                     }}
+            >
+            {budgetState.state.map((obj: GroupType) => {
+              let assigned = 0;
+              let available = 0;
+              for (const child of obj.children) {
+                const currData = child.data.filter((obj2) => obj2.month == props.month && obj2.year == props.year);
+                if (currData.length == 1) {
+                  assigned += currData[0].assigned;
+                  available += currData[0].available;
+                }
               }
-            }
-            return (
-              <Group key={obj.id} title={obj.title} assigned={assigned} available={available} id={obj.id} displayChild={displayChild}
-                     month={props.month} year={props.year} isDisabled={disableEditing} />
-            )
-          })}
+              return (
+                  <Group key={obj.id} title={obj.title} assigned={assigned} available={available} id={obj.id} displayChild={displayChild}
+                         month={props.month} year={props.year} isDisabled={disableEditing} />
+              )
+            })}
+          </Swappable>
         </ViewContainer>}
       </div>
       {budgetState.loading && <CircularProgress isIndeterminate/>}
