@@ -108,8 +108,6 @@ export default function SpreadsheetView(props: Props) {
                        const obj2 = getGroupObject(id2);
 
                        if (obj1 && obj2) {
-                         obj1.transitioning = true;
-                         obj2.transitioning = true;
                          swapGroup(obj1, obj2);
                        }
                      }}
@@ -118,6 +116,8 @@ export default function SpreadsheetView(props: Props) {
                        const obj2 = getGroupObject(id2);
 
                        if (obj1 && obj2 && !obj1.transitioning && !obj2.transitioning) {
+                         obj1.transitioning = true;
+                         obj2.transitioning = true;
                          return true;
                        } else {
                          return false;

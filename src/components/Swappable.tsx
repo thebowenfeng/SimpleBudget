@@ -90,8 +90,9 @@ export default function Swappable(props: Props) {
                         if (props.isSwapping(child.props.id, dragState.current.draggedItem.props.id)) {
                             addAnimation(child.props.id, dragState.current.draggedItem.props.id);
                             setTimeout(() => {
-                                removeAnimation(child.props.id, dragState.current.draggedItem?.props.id);
                                 props.onSwap(child.props.id, dragState.current.draggedItem?.props.id);
+                                removeAnimation(child.props.id, dragState.current.draggedItem?.props.id);
+                                props.onSwapEnd(child.props.id, dragState.current.draggedItem?.props.id)
                             }, 250);
                         }
                     }
