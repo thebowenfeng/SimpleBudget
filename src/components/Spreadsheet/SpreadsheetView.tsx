@@ -79,6 +79,46 @@ export default function SpreadsheetView(props: Props) {
     }
   }
 
+  const onSwap = (id1: string, id2: string) => {
+    const obj1 = getGroupObject(id1);
+    const obj2 = getGroupObject(id2);
+
+    if (obj1 && obj2) {
+      swapGroup(obj1, obj2);
+      obj1.transitioning = false;
+      obj2.transitioning = false;
+    }
+  }
+
+  const isSwapping = (id1: string, id2: string) => {
+    const obj1 = getGroupObject(id1);
+    const obj2 = getGroupObject(id2);
+
+    if (obj1 && obj2 && !obj1.transitioning && !obj2.transitioning) {
+      obj1.transitioning = true;
+      obj2.transitioning = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const mapGroups = (obj: GroupType) => {
+    let assigned = 0;
+    let available = 0;
+    for (const child of obj.children) {
+      const currData = child.data.filter((obj2) => obj2.month == props.month && obj2.year == props.year);
+      if (currData.length == 1) {
+        assigned += currData[0].assigned;
+        available += currData[0].available;
+      }
+    }
+    return (
+      <Group key={obj.id} title={obj.title} assigned={assigned} available={available} id={obj.id} displayChild={displayChild}
+             month={props.month} year={props.year} isDisabled={disableEditing} />
+    )
+  }
+
   return (
     <div style={{textAlign: 'center'}}>
       <ActionsBar>
@@ -103,51 +143,8 @@ export default function SpreadsheetView(props: Props) {
       <div style={{ cursor: disableEditing ? "not-allowed" : undefined }}>
         {!budgetState.loading && <ViewContainer style={{ pointerEvents: disableEditing ? "none" : undefined }}>
           <Swappable onDrag={() => setDisplayChild(false)} onDragStop={() => setDisplayChild(true)}
-                     onSwap={(id1, id2) => {
-                       const obj1 = getGroupObject(id1);
-                       const obj2 = getGroupObject(id2);
-
-                       if (obj1 && obj2) {
-                         swapGroup(obj1, obj2);
-                       }
-                     }}
-                     isSwapping={(id1, id2) => {
-                       const obj1 = getGroupObject(id1);
-                       const obj2 = getGroupObject(id2);
-
-                       if (obj1 && obj2 && !obj1.transitioning && !obj2.transitioning) {
-                         obj1.transitioning = true;
-                         obj2.transitioning = true;
-                         return true;
-                       } else {
-                         return false;
-                       }
-                     }}
-                     onSwapEnd={(id1, id2) => {
-                       const obj1 = getGroupObject(id1);
-                       const obj2 = getGroupObject(id2);
-
-                       if (obj1 && obj2) {
-                         obj1.transitioning = false;
-                         obj2.transitioning = false;
-                       }
-                     }}
-            >
-            {budgetState.state.map((obj: GroupType) => {
-              let assigned = 0;
-              let available = 0;
-              for (const child of obj.children) {
-                const currData = child.data.filter((obj2) => obj2.month == props.month && obj2.year == props.year);
-                if (currData.length == 1) {
-                  assigned += currData[0].assigned;
-                  available += currData[0].available;
-                }
-              }
-              return (
-                  <Group key={obj.id} title={obj.title} assigned={assigned} available={available} id={obj.id} displayChild={displayChild}
-                         month={props.month} year={props.year} isDisabled={disableEditing} />
-              )
-            })}
+                     onSwap={onSwap} isSwapping={isSwapping}>
+            {budgetState.state.map(mapGroups)}
           </Swappable>
         </ViewContainer>}
       </div>

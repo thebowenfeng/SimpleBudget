@@ -50,28 +50,6 @@ function findObj(id: string, lst: GroupType[]): GroupType | null {
   return null;
 }
 
-function addAnimation(index1: number, index2: number, id1: string, id2: string) {
-  if (document.getElementById(id1) && document.getElementById(id2)) {
-    // @ts-ignore
-    document.getElementById(id1).style.animation = "slide-animation 0.3s ease"
-    // @ts-ignore
-    document.getElementById(id2).style.animation = "slide-animation 0.3s ease"
-    // @ts-ignore
-    document.getElementById(id1).style.setProperty('--m', `${(index2 - index1) * 40}px`)
-    // @ts-ignore
-    document.getElementById(id2).style.setProperty('--m', `${(index1 - index2) * 40}px`)
-  }
-}
-
-function removeAnimation(item1: GroupType | CategoryType, item2: GroupType | CategoryType) {
-  if (document.getElementById(item1.id) && document.getElementById(item2.id)) {
-    document.getElementById(item1.id)?.style.removeProperty('animation');
-    document.getElementById(item2.id)?.style.removeProperty('animation');
-  }
-  item1.transitioning = false;
-  item2.transitioning = false;
-}
-
 export function randId() {
   return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
@@ -127,39 +105,24 @@ export const actions = {
       const index1 = getIndex(item1.id, newState);
       const index2 = getIndex(item2.id, newState);
 
-      addAnimation(index1, index2, item1.id, item2.id);
-
       newState[index1] = item2;
       newState[index2] = item1;
       setState({ state: newState });
     },
   swapCategory: (groupId: string, item1: CategoryType, item2: CategoryType): Action<BudgetState> =>
     ({setState, getState}) => {
-      if (!item1.transitioning && !item2.transitioning) {
-        item1.transitioning = true;
-        item2.transitioning = true;
-        const newState = [...getState().state]
-        const group = findObj(groupId, newState);
-        if (group) {
-          const newChildrenState = [...group.children]
-          const index1 = getIndex(item1.id, newChildrenState);
-          const index2 = getIndex(item2.id, newChildrenState);
+      const newState = [...getState().state]
+      const group = findObj(groupId, newState);
+      if (group) {
+        const newChildrenState = [...group.children]
+        const index1 = getIndex(item1.id, newChildrenState);
+        const index2 = getIndex(item2.id, newChildrenState);
 
-          addAnimation(index1, index2, item1.id, item2.id);
+        newChildrenState[index1] = item2;
+        newChildrenState[index2] = item1;
 
-          newChildrenState[index1] = item2;
-          newChildrenState[index2] = item1;
-
-          group.children = newChildrenState;
-
-          setTimeout(() => {
-            removeAnimation(item1, item2);
-            setState({ state: newState })
-          }, 250);
-        } else {
-          item1.transitioning = false;
-          item2.transitioning = false;
-        }
+        group.children = newChildrenState;
+        setState({ state: newState })
       }
     },
   addGroup: (title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>

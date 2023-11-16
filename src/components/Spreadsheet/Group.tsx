@@ -1,10 +1,6 @@
 import { styled } from 'styled-components'
 import { Heading, IconButton } from '@chakra-ui/react'
-import React, {
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import { useState } from 'react'
 import { ArrowDownIcon, ArrowForwardIcon, AddIcon } from '@chakra-ui/icons'
 import { isMobile } from 'react-device-detect'
 import Category from './Category.tsx'
@@ -13,6 +9,7 @@ import './Animation.css'
 import CreateBudgetDrawer from './CreateBudgetDrawer.tsx'
 import CreateGroupDrawer from './CreateGroupDrawer.tsx'
 import { getTheme } from '../../themes/theme.ts'
+import Swappable from '../Swappable.tsx'
 
 interface Props {
   id: string,
@@ -23,11 +20,6 @@ interface Props {
   month: number,
   year: number,
   isDisabled: boolean,
-}
-
-interface DragState {
-  isMouseDown: boolean;
-  draggedItem: CategoryType | null;
 }
 
 const Header = styled.div`
@@ -73,65 +65,13 @@ function getChildren(groupId: string, state: BudgetState) {
   return [];
 }
 
-function byId(id: string) {
-  return document.getElementById(id)
-}
-
 export default function Group(props: Props) {
   const [isFolded, setIsFolded] = useState<boolean>(false);
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
   const budgetState = useBudgetState()
   const { swapCategory } = useBudgetActions();
   const maxChildrenHeight = getChildren(props.id, budgetState).length * (isMobile ? 80 : 40);
-
-  const onMouseUp =(event: MouseEvent) => {
-    event.stopPropagation()
-    dragState.current.isMouseDown = false;
-    if (dragState.current.draggedItem) {
-      byId(dragState.current.draggedItem.id)?.style.removeProperty('border');
-    }
-    dragState.current.draggedItem = null;
-  }
-
-  const onMouseDown =(event: MouseEvent) => {
-    event.stopPropagation()
-    dragState.current.isMouseDown = true;
-  }
-
-  const onMouseMoveFn = (event: React.MouseEvent) => {
-    event.stopPropagation()
-
-    if (dragState.current.isMouseDown) {
-      if (!dragState.current.draggedItem) {
-        for (const categoryItem of getChildren(props.id, budgetState)) {
-          if (byId(categoryItem.id) && byId(categoryItem.id)?.matches(":hover")) {
-            dragState.current.draggedItem = categoryItem;
-            break;
-          }
-        }
-      }
-
-      if (dragState.current.draggedItem && byId(dragState.current.draggedItem.id)) {
-        // @ts-ignore
-        byId(dragState.current.draggedItem.id).style.border = "2px solid blue";
-
-        for (const categoryItem of getChildren(props.id, budgetState)) {
-          if (byId(categoryItem.id)?.matches(":hover") && categoryItem.id != dragState.current.draggedItem.id) {
-            swapCategory(props.id, categoryItem, dragState.current.draggedItem);
-          }
-        }
-
-        for (const categoryItem of getChildren(props.id, budgetState)) {
-          if (categoryItem.id != dragState.current.draggedItem.id) {
-            byId(categoryItem.id)?.style.removeProperty('border')
-          }
-        }
-      }
-    }
-     
-  }
 
   const adjustHeight = (): string => {
     if (props.displayChild && !isFolded) {
@@ -141,15 +81,53 @@ export default function Group(props: Props) {
     }
   }
 
-  useEffect(() => {
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mouseup", onMouseUp);
-
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
+  const mapCategory = (obj: CategoryType) => {
+    const currData = obj.data.filter((obj2) => obj2.year == props.year && obj2.month == props.month);
+    let assigned = 0;
+    let available = 0;
+    if (currData.length == 1) {
+      assigned = currData[0].assigned;
+      available = currData[0].available;
     }
-  }, [])
+    return (<Category title={obj.title} id={obj.id} key={obj.id} month={props.month} year={props.year}
+                      assigned={assigned} available={available} groupId={props.id} isDisabled={props.isDisabled}/>)
+  }
+
+  const getCategoryObject = (id: string) => {
+    for (const child of budgetState.state) {
+      if (child.id == props.id) {
+        for (const category of child.children) {
+          if (category.id == id) {
+            return category;
+          }
+        }
+      }
+    }
+  }
+
+  const onSwap = (id1: string, id2: string) => {
+    const obj1 = getCategoryObject(id1);
+    const obj2 = getCategoryObject(id2);
+
+    if (obj1 && obj2) {
+      swapCategory(props.id, obj1, obj2);
+      obj1.transitioning = false;
+      obj2.transitioning = false;
+    }
+  }
+
+  const isSwapping = (id1: string, id2: string) => {
+    const obj1 = getCategoryObject(id1);
+    const obj2 = getCategoryObject(id2);
+
+    if (obj1 && obj2 && !obj1.transitioning && !obj2.transitioning) {
+      obj1.transitioning = true;
+      obj2.transitioning = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   return(
     <>
@@ -178,19 +156,11 @@ export default function Group(props: Props) {
         <ChildrenContainer style={{
                             minHeight: adjustHeight(),
                             maxHeight: adjustHeight(),
-                          }}
-                          onMouseMove={onMouseMoveFn}>
-        {getChildren(props.id, budgetState).map((obj) => {
-          const currData = obj.data.filter((obj2) => obj2.year == props.year && obj2.month == props.month);
-          let assigned = 0;
-          let available = 0;
-          if (currData.length == 1) {
-            assigned = currData[0].assigned;
-            available = currData[0].available;
-          }
-          return (<Category title={obj.title} id={obj.id} key={obj.id} month={props.month} year={props.year}
-                            assigned={assigned} available={available} groupId={props.id} isDisabled={props.isDisabled}/>)
-        })}
+                          }}>
+          <Swappable isSwapping={isSwapping} onDrag={() => undefined} onDragStop={() => undefined}
+                     onSwap={onSwap}>
+            {getChildren(props.id, budgetState).map(mapCategory)}
+          </Swappable>
         </ChildrenContainer>
       }
       <CreateBudgetDrawer isOpen={isCreate} onClose={() => setIsCreate(false)} groupId={props.id}

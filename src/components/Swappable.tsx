@@ -5,12 +5,12 @@ interface Props {
     onDrag: () => void,
     onDragStop: () => void,
     onSwap: (id1: string, id2: string) => void,
-    onSwapEnd: (id1: string, id2: string) => void,
     children: ReactNode
 }
 
 interface DragState {
     isMouseDown: boolean;
+    // eslint-disable-next-line
     draggedItem:  React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | null;
 }
 
@@ -47,21 +47,6 @@ function removeAnimation(id1: string, id2: string) {
 export default function Swappable(props: Props) {
     const dragState = useRef<DragState>({ isMouseDown: false, draggedItem: null });
 
-    const onMouseUp =(event: MouseEvent) => {
-        event.stopPropagation();
-        props.onDragStop();
-        dragState.current.isMouseDown = false;
-        if (dragState.current.draggedItem) {
-            byId(dragState.current.draggedItem.props.id)?.style.removeProperty('border')
-        }
-        dragState.current.draggedItem = null;
-    }
-
-    const onMouseDown =(event: MouseEvent) => {
-        event.stopPropagation()
-        dragState.current.isMouseDown = true;
-    }
-
     const onMouseMoveFn = (event: React.MouseEvent) => {
         event.stopPropagation()
         if (dragState.current.isMouseDown) {
@@ -92,7 +77,6 @@ export default function Swappable(props: Props) {
                             setTimeout(() => {
                                 props.onSwap(child.props.id, dragState.current.draggedItem?.props.id);
                                 removeAnimation(child.props.id, dragState.current.draggedItem?.props.id);
-                                props.onSwapEnd(child.props.id, dragState.current.draggedItem?.props.id)
                             }, 250);
                         }
                     }
@@ -111,6 +95,21 @@ export default function Swappable(props: Props) {
     }
 
     useEffect(() => {
+        const onMouseUp = (event: MouseEvent) => {
+            event.stopPropagation();
+            props.onDragStop();
+            dragState.current.isMouseDown = false;
+            if (dragState.current.draggedItem) {
+                byId(dragState.current.draggedItem.props.id)?.style.removeProperty('border')
+            }
+            dragState.current.draggedItem = null;
+        }
+
+        const onMouseDown = (event: MouseEvent) => {
+            event.stopPropagation()
+            dragState.current.isMouseDown = true;
+        }
+
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
 
@@ -118,7 +117,7 @@ export default function Swappable(props: Props) {
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
         }
-    }, []);
+    }, [props]);
 
     return (
         <div onMouseMove={onMouseMoveFn}>
