@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
 import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
-import { useBudgetActions } from '../stores/budgetStore.ts'
+import { useBudgetActions, useBudgetState } from '../stores/budgetStore.ts'
 import { useContext, useEffect, useState } from 'react'
 import { getFirestore } from 'firebase/firestore'
 import { FirebaseContext } from '../contexts/FirebaseContext.ts'
@@ -41,6 +41,7 @@ const Body = styled.div`
 `
 
 export default function Budget() {
+  const budgetState = useBudgetState();
   const { loadBudget, addDefaultMonthlyData } = useBudgetActions();
   const app = useContext(FirebaseContext);
   const user = useContext(FirebaseAuthContext);
@@ -50,7 +51,7 @@ export default function Budget() {
   const [month, setMonth] = useState<number>(new Date().getMonth());
 
   useEffect(() => {
-    if (user && db) {
+    if (user && db && budgetState.state.length == 0) {
       loadBudget(db, user, () => {
         showToast(toast, "Successfully loaded data", "success");
       }, (error) => {

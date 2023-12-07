@@ -103,6 +103,17 @@ export default function SpreadsheetView(props: Props) {
     }
   }
 
+  const onDragStop = () => {
+    setDisplayChild(true);
+    // Set all transition to false manually
+    budgetState.state.forEach((obj) => {
+      obj.transitioning = false;
+      obj.children.forEach((obj2) => {
+        obj2.transitioning = false;
+      })
+    })
+  }
+
   const mapGroups = (obj: GroupType) => {
     let assigned = 0;
     let available = 0;
@@ -142,7 +153,7 @@ export default function SpreadsheetView(props: Props) {
       </LabelHeader>
       <div style={{ cursor: disableEditing ? "not-allowed" : undefined }}>
         {!budgetState.loading && <ViewContainer style={{ pointerEvents: disableEditing ? "none" : undefined }}>
-          <Swappable onDrag={() => setDisplayChild(false)} onDragStop={() => setDisplayChild(true)}
+          <Swappable onDrag={() => setDisplayChild(false)} onDragStop={onDragStop}
                      onSwap={onSwap} isSwapping={isSwapping}>
             {budgetState.state.map(mapGroups)}
           </Swappable>

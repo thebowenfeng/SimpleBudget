@@ -95,18 +95,23 @@ export default function Swappable(props: Props) {
     }
 
     useEffect(() => {
-        const onMouseUp = (event: MouseEvent) => {
-            event.stopPropagation();
+        // Captures click to prevent propagation into children
+        const captureClick = (e: MouseEvent) => {
+            e.stopPropagation();
+            document.removeEventListener('click', captureClick, true);
+        }
+
+        const onMouseUp = () => {
             props.onDragStop();
             dragState.current.isMouseDown = false;
             if (dragState.current.draggedItem) {
+                document.addEventListener("click", captureClick, true);
                 byId(dragState.current.draggedItem.props.id)?.style.removeProperty('border')
             }
             dragState.current.draggedItem = null;
         }
 
-        const onMouseDown = (event: MouseEvent) => {
-            event.stopPropagation()
+        const onMouseDown = () => {
             dragState.current.isMouseDown = true;
         }
 

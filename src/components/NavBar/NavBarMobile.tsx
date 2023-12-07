@@ -3,6 +3,10 @@ import { navBarItems } from './config.tsx'
 import { Heading, IconButton } from '@chakra-ui/react'
 import { getTheme } from '../../themes/theme.ts'
 
+interface Props {
+  setPage: (state: string) => void
+}
+
 const RootContainer = styled.div`
   width: 100vw;
   height: 200px;
@@ -24,7 +28,7 @@ const NavBarEntryContainer = styled.div`
   width: ${Math.round(100 / navBarItems.length) + 'vw'};
   color: ${getTheme().dark.fontColor}
 `
-export default function NavBarMobile() {
+export default function NavBarMobile(props: Props) {
   return(
     <RootContainer>
       {navBarItems.map((obj) => {
@@ -33,6 +37,7 @@ export default function NavBarMobile() {
             <IconButton aria-label={obj.title} icon={obj.icon} variant={'ghost'}
                         height={'100px'} width={'100px'} fontSize={'100px'}
                         color={getTheme().dark.fontColor} _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
+                        onClick={() => obj.onClick(props.setPage)}
             />
             <Heading>{obj.title}</Heading>
           </NavBarEntryContainer>

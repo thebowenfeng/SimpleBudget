@@ -8,7 +8,12 @@ import { getTheme } from '../../themes/theme.ts'
 
 interface NavBarEntryProps {
   label: string,
-  icon: ReactElement
+  icon: ReactElement,
+  onClick: () => void
+}
+
+interface Props {
+  setPage: (state: string) => void
 }
 
 const RootWrapper = styled.div`
@@ -39,7 +44,7 @@ const HeadingWrapper = styled.div`
   animation: ${slideRight} 1s ease;
 `
 
-export default function NavBarDesktop() {
+export default function NavBarDesktop(props: Props) {
   const [expand, setExpand] = useState<boolean>(false)
 
   const NarBarEntry = (props: NavBarEntryProps) => {
@@ -49,12 +54,15 @@ export default function NavBarDesktop() {
                                 color={getTheme().dark.buttonTheme.fontColor}
                                 bg={getTheme().dark.buttonTheme.backgroundColor}
                                 _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
+                                onClick={props.onClick}
+
         />}
         {expand && <Button variant={"ghost"}
                            color={getTheme().dark.buttonTheme.fontColor}
                            bg={getTheme().dark.buttonTheme.backgroundColor}
                            _hover={{bg: getTheme().dark.buttonTheme.hoverColor}}
                            sx={{minWidth: "80%"}}
+                           onClick={props.onClick}
         >{props.icon}{props.label}</Button>}
       </>
     )
@@ -76,7 +84,7 @@ export default function NavBarDesktop() {
       {expand && <AppTitle />}
       {navBarItems.map((obj) => {
         return(
-          <NarBarEntry label={obj.title} icon={obj.icon} />
+          <NarBarEntry label={obj.title} icon={obj.icon} onClick={() => obj.onClick(props.setPage)} />
         )
       })}
       <IconButton icon={expand ? <ArrowLeftIcon /> : <ArrowRightIcon />} onClick={() => {setExpand(!expand)}}

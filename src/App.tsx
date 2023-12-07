@@ -13,7 +13,7 @@ import NavBarMobile from './components/NavBar/NavBarMobile.tsx'
 import Budget from './pages/Budget.tsx'
 import { FirebaseAuthContext } from './contexts/FirebaseAuthContext.ts'
 
-type Page = "undefined" | "login" | "budget"
+type Page = "undefined" | "login" | "budget" | "bank"
 
 const RootWrapper = styled.div`
   display: flex;
@@ -67,9 +67,10 @@ export default function App() {
           {page == "login" && <Login />}
           {(page != "login" && page != "undefined") &&
             <RootWrapper>
-              {!isMobile && <NavBarDesktop/>}
+              {!isMobile && <NavBarDesktop setPage={state => setPage(state as Page)}/>}
               {page == "budget" && <Budget />}
-              {isMobile && <NavBarMobile />}
+              {page == "bank" && <h1>test</h1>}
+              {isMobile && <NavBarMobile setPage={state => setPage(state as Page)}/>}
             </RootWrapper>
           }
         </FirebaseAuthContext.Provider>

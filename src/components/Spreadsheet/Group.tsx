@@ -129,6 +129,16 @@ export default function Group(props: Props) {
     }
   }
 
+  const onDragStop = () => {
+    // Set all transition to false manually
+    budgetState.state.forEach((obj) => {
+      obj.transitioning = false;
+      obj.children.forEach((obj2) => {
+        obj2.transitioning = false;
+      })
+    })
+  }
+
   return(
     <>
       <Header id={props.id} onClick={() => !props.isDisabled && setIsEdit(true)}>
@@ -157,7 +167,7 @@ export default function Group(props: Props) {
                             minHeight: adjustHeight(),
                             maxHeight: adjustHeight(),
                           }}>
-          <Swappable isSwapping={isSwapping} onDrag={() => undefined} onDragStop={() => undefined}
+          <Swappable isSwapping={isSwapping} onDrag={() => undefined} onDragStop={onDragStop}
                      onSwap={onSwap}>
             {getChildren(props.id, budgetState).map(mapCategory)}
           </Swappable>
