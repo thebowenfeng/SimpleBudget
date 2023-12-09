@@ -69,8 +69,6 @@ export default function NavBarDesktop(props: Props) {
   }
 
   const AppTitle = useCallback(() => {
-    console.log('remounted')
-
     return (
       <HeadingWrapper>
         <Heading fontSize={'1.5rem'} sx={{marginBottom: '10px'}} color={getTheme().dark.fontColor}>Simple Budget</Heading>
