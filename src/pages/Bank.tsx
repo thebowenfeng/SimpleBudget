@@ -2,6 +2,8 @@ import { styled } from 'styled-components'
 import { isMobile } from 'react-device-detect'
 import { Button } from '@chakra-ui/react'
 import { getTheme } from '../themes/theme.ts'
+import BankInfo from '../components/BankInfo.tsx'
+import { ReactNode } from 'react'
 
 const RootContainer = styled.div`
   display: flex;
@@ -25,19 +27,29 @@ const Header = styled.div`
 
 const RightContainer = styled.div`
   margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  column-gap: 10px;
 `
 
 export default function Bank() {
+  const ThemedButton = ({ children }: {children: ReactNode}) => {
+    return (
+      <Button
+        backgroundColor={getTheme().dark.buttonTheme.backgroundColor}
+        _hover={{bg: getTheme().dark.backgroundColor}}
+        color={getTheme().dark.fontColor}
+      >{children}</Button>
+    )
+  }
+
   return (
     <RootContainer>
       <Header>
-        <h1>test</h1>
+        <BankInfo />
         <RightContainer>
-          <Button
-            backgroundColor={getTheme().dark.buttonTheme.backgroundColor}
-            _hover={{bg: getTheme().dark.backgroundColor}}
-            color={getTheme().dark.fontColor}
-          >Create Account</Button>
+          <ThemedButton>Edit Account</ThemedButton>
+          <ThemedButton>Create Account</ThemedButton>
         </RightContainer>
       </Header>
     </RootContainer>
