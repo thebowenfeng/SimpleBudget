@@ -12,6 +12,7 @@ import NavBarDesktop from './components/NavBar/NavBarDesktop.tsx'
 import NavBarMobile from './components/NavBar/NavBarMobile.tsx'
 import Budget from './pages/Budget.tsx'
 import { FirebaseAuthContext } from './contexts/FirebaseAuthContext.ts'
+import Bank from './pages/Bank.tsx'
 
 type Page = "undefined" | "login" | "budget" | "bank"
 
@@ -69,7 +70,7 @@ export default function App() {
             <RootWrapper>
               {!isMobile && <NavBarDesktop setPage={state => setPage(state as Page)}/>}
               {page == "budget" && <Budget />}
-              {page == "bank" && <h1>test</h1>}
+              {page == "bank" && <Bank />}
               {isMobile && <NavBarMobile setPage={state => setPage(state as Page)}/>}
             </RootWrapper>
           }

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import MonthPicker from '../components/MonthPicker.tsx'
 import { isMobile } from 'react-device-detect'
-import SpreadsheetView from '../components/Spreadsheet/SpreadsheetView.tsx'
+import BudgetSpreadsheetView from '../components/BudgetSpreadsheet/BudgetSpreadsheetView.tsx'
 import { useBudgetActions, useBudgetState } from '../stores/budgetStore.ts'
 import { useContext, useEffect, useState } from 'react'
 import { getFirestore } from 'firebase/firestore'
@@ -83,7 +83,7 @@ export default function Budget() {
         </HeaderContainer>
       </Header>
       <Body>
-        <SpreadsheetView month={month} year={year}/>
+        <BudgetSpreadsheetView month={month} year={year}/>
       </Body>
     </RootContainer>
   )

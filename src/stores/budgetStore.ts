@@ -1,5 +1,5 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
-import '../components/Spreadsheet/Animation.css'
+import '../components/BudgetSpreadsheet/Animation.css'
 import { Firestore, addDoc, collection, doc, deleteDoc, getDocs, query, where, updateDoc, arrayUnion } from 'firebase/firestore'
 import { User } from 'firebase/auth'
 

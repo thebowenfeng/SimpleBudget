@@ -59,7 +59,7 @@ const LabelContainer = styled.div`
   height: 100%;
 `
 
-export default function SpreadsheetView(props: Props) {
+export default function BudgetSpreadsheetView(props: Props) {
   const [displayChild, setDisplayChild] = useState<boolean>(true);
   const [isCreateGroup, setIsCreateGroup] = useState<boolean>(false);
   const [isDeleteGroup, setIsDeleteGroup] = useState<boolean>(false);

@@ -1,5 +1,5 @@
 import { keyframes, styled } from 'styled-components'
-import { ReactElement, useState } from 'react'
+import { ReactElement, useCallback, useState } from 'react'
 import { Button, IconButton, Heading } from '@chakra-ui/react'
 import { Icon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { BsFillBootstrapFill } from 'react-icons/bs'
@@ -68,20 +68,21 @@ export default function NavBarDesktop(props: Props) {
     )
   }
 
-  const AppTitle = () => {
+  const AppTitle = useCallback(() => {
+    console.log('remounted')
+
     return (
       <HeadingWrapper>
         <Heading fontSize={'1.5rem'} sx={{marginBottom: '10px'}} color={getTheme().dark.fontColor}>Simple Budget</Heading>
       </HeadingWrapper>
     )
-  }
+  }, []);
 
   return (
     <RootWrapper style={{width: expand ? '180px' : '80px'}}>
-      {!expand && <Icon boxSize={30} as={BsFillBootstrapFill} sx={{marginBottom: '10px'}}
+      {!expand ? <Icon boxSize={30} as={BsFillBootstrapFill} sx={{marginBottom: '10px'}}
                         color={getTheme().dark.fontColor}
-      />}
-      {expand && <AppTitle />}
+      /> : <AppTitle />}
       {navBarItems.map((obj) => {
         return(
           <NarBarEntry label={obj.title} icon={obj.icon} onClick={() => obj.onClick(props.setPage)} />
