@@ -5,6 +5,7 @@ import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersis
 import { isMobile } from 'react-device-detect'
 import { showToast } from '../utils/toast.ts'
 import { getTheme } from '../themes/theme.ts'
+import Loadable from '../components/Loadable.tsx'
 
 const RootWrapper = styled.div`
   height: 100vh;
@@ -36,6 +37,7 @@ export default function Login() {
   const pswdRef = useRef<HTMLInputElement>(null);
   const toast = useToast()
   const auth = getAuth()
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onLogin = () => {
     if(emailRef.current && pswdRef.current) {
@@ -46,9 +48,12 @@ export default function Login() {
       } else {
         setPersistence(auth, browserLocalPersistence).then(() => {
           if (emailRef.current && pswdRef.current) {
+            setLoading(true);
             signInWithEmailAndPassword(auth, emailRef.current.value, pswdRef.current?.value).then(() => {
+              setLoading(false);
               showToast(toast,"Login success", "success")
             }).catch((error) => {
+              setLoading(false);
               showToast(toast, error.code, "error", error.message)
             })
           }
@@ -90,15 +95,17 @@ export default function Login() {
             </Button>
           </InputRightElement>
         </InputGroup>
-        <Button size={"lg"} onClick={onLogin}
-                sx={{
-                  height: isMobile ? "100px" : "var(--chakra-sizes-12)",
-                  width: isMobile ? "200px" : "var(--chakra-sizes-20)",
-                  fontSize: isMobile ? "3rem" : "var(--chakra-fontSizes-lg)"
-                }}
-                bg={getTheme().light.buttonTheme.backgroundColor}
-                color={getTheme().light.buttonTheme.fontColor}
-        >Login</Button>
+        <Loadable isLoading={loading}>
+          <Button size={"lg"} onClick={onLogin}
+                  sx={{
+                    height: isMobile ? "100px" : "var(--chakra-sizes-12)",
+                    width: isMobile ? "200px" : "var(--chakra-sizes-20)",
+                    fontSize: isMobile ? "3rem" : "var(--chakra-fontSizes-lg)"
+                  }}
+                  bg={getTheme().light.buttonTheme.backgroundColor}
+                  color={getTheme().light.buttonTheme.fontColor}
+          >Login</Button>
+        </Loadable>
       </LoginWrapper>
     </RootWrapper>
   )

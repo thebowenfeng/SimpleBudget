@@ -47,7 +47,10 @@ export default function BankLinkModal(props: Props) {
         <ModalBody>
           <InputFields>
             {accounts.length == 0 && <Login onSuccess={(res) => setAccounts([...res])}/>}
-            {accounts.length > 0 && <Selection accounts={accounts} onSubmit={props.onClose}/>}
+            {accounts.length > 0 && <Selection accounts={accounts} onSubmit={() => {
+              setAccounts([])
+              props.onClose()
+            }}/>}
           </InputFields>
         </ModalBody>
       </ModalContent>

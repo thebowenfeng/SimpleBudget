@@ -12,6 +12,7 @@ import { login } from '../../requests/auth.ts'
 import { FirebaseAuthContext } from '../../contexts/FirebaseAuthContext.ts'
 import { showToast } from '../../utils/toast.ts'
 import { Account } from './BankLinkModal.tsx'
+import Loadable from '../Loadable.tsx'
 
 interface Props {
   onSuccess: (accounts: Account[]) => void
@@ -23,14 +24,18 @@ export default function Login(props: Props) {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const toast = useToast()
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
       const resData = await login(user?.uid as string,
         usernameRef.current?.value as string, passwordRef.current?.value as string);
+      setLoading(false);
       // @ts-ignore
       props.onSuccess(resData.map((obj) => {return {id: obj.accountNumber, name: obj.name, balance: obj.funds}}))
     } catch (e: any) { // eslint-disable-line
+      setLoading(false);
       showToast(toast, "Server error", "error", e.message)
     }
   }
@@ -65,16 +70,18 @@ export default function Login(props: Props) {
           </Button>
         </InputRightElement>
       </InputGroup>
-      <Button size={"lg"}
-              sx={{
-                height: isMobile ? "70px" : undefined,
-                width: isMobile ? "140px" : undefined,
-                fontSize: isMobile ? "2.5rem" : undefined
-              }}
-              bg={getTheme().light.buttonTheme.backgroundColor}
-              color={getTheme().light.buttonTheme.fontColor}
-              onClick={handleLogin}
-      >Link</Button>
+      <Loadable isLoading={loading}>
+        <Button size={"lg"}
+                sx={{
+                  height: isMobile ? "70px" : undefined,
+                  width: isMobile ? "140px" : undefined,
+                  fontSize: isMobile ? "2.5rem" : undefined
+                }}
+                bg={getTheme().light.buttonTheme.backgroundColor}
+                color={getTheme().light.buttonTheme.fontColor}
+                onClick={handleLogin}
+        >Link</Button>
+      </Loadable>
     </>
   )
 }
