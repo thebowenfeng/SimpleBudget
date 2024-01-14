@@ -3,7 +3,8 @@ import { isMobile } from 'react-device-detect'
 import { Button } from '@chakra-ui/react'
 import { getTheme } from '../themes/theme.ts'
 import BankInfo from '../components/BankInfo.tsx'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
+import BankLinkModal from '../components/BankLinkModal/BankLinkModal.tsx'
 
 const RootContainer = styled.div`
   display: flex;
@@ -33,25 +34,31 @@ const RightContainer = styled.div`
 `
 
 export default function Bank() {
-  const ThemedButton = ({ children }: {children: ReactNode}) => {
+  const ThemedButton = ({ onClick, children }: {onClick: () => void, children: ReactNode}) => {
     return (
       <Button
         backgroundColor={getTheme().dark.buttonTheme.backgroundColor}
         _hover={{bg: getTheme().dark.backgroundColor}}
         color={getTheme().dark.fontColor}
+        fontSize={isMobile ? "2.2rem" : undefined}
+        height={isMobile ? "75px" : undefined}
+        borderRadius={isMobile ? "15px" : undefined}
+        onClick={onClick}
       >{children}</Button>
     )
   }
+
+  const [isLinkBankOpen, setIsLinkBankOpen] = useState<boolean>(false)
 
   return (
     <RootContainer>
       <Header>
         <BankInfo />
         <RightContainer>
-          <ThemedButton>Edit Account</ThemedButton>
-          <ThemedButton>Create Account</ThemedButton>
+          <ThemedButton onClick={() => setIsLinkBankOpen(true)}>Link Account</ThemedButton>
         </RightContainer>
       </Header>
+      <BankLinkModal isOpen={isLinkBankOpen} onClose={() => setIsLinkBankOpen(false)} />
     </RootContainer>
   )
 }

@@ -1,5 +1,7 @@
 import { styled } from 'styled-components'
 import { Heading } from '@chakra-ui/react'
+import { isMobile } from 'react-device-detect'
+import { useBankState } from '../stores/bankStore.ts'
 
 const Container = styled.div`
   display: flex;
@@ -7,10 +9,12 @@ const Container = styled.div`
   row-gap: 5px;
 `
 export default function BankInfo() {
+  const state = useBankState()
+
   return (
     <Container>
-      <Heading>Bank account | $5</Heading>
-      <h1>Balance: $5</h1>
+      <Heading fontSize={isMobile ? "3rem" : undefined}>{state.state == null ? "Link an account" : state.state.name}</Heading>
+      <h1 style={{fontSize: isMobile ? "2.2rem" : undefined}}>Balance: ${state.state == null ? "0" : state.state.balance}</h1>
     </Container>
   )
 }
