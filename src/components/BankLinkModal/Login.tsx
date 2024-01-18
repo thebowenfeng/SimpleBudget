@@ -13,6 +13,9 @@ import { FirebaseAuthContext } from '../../contexts/FirebaseAuthContext.ts'
 import { showToast } from '../../utils/toast.ts'
 import { Account } from './BankLinkModal.tsx'
 import Loadable from '../Loadable.tsx'
+import axios from 'axios'
+import { handleAxiosError } from '../../requests/config.ts'
+import { UnifiedError } from '../../utils/error.ts'
 
 interface Props {
   onSuccess: (accounts: Account[]) => void
@@ -37,9 +40,10 @@ export default function Login(props: Props) {
       props.onSuccess(resData.data.map((obj) => {
         return {id: obj.accountNumber, name: obj.name, balance: obj.funds, credentials: save ? resData?.credentials : undefined}
       }))
-    } catch (e: any) { // eslint-disable-line
+    } catch (e: unknown) {
       setLoading(false);
-      showToast(toast, "Server error", "error", e.message)
+      const error = axios.isAxiosError(e) ? handleAxiosError(e) : new UnifiedError("Error", (e as Error).message)
+      showToast(toast, error.code, "error", error.message)
     }
   }
 

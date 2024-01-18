@@ -7,25 +7,13 @@ export async function login(userId: string, username: string, password: string) 
   const encrypt = new JSEncrypt()
   encrypt.setPublicKey(pubKey)
   const encrypted = encrypt.encrypt(`${username} ${password}`)
-  try {
-    const res = await axios.post(`${API_HOST}/auth/login?userId=${userId}`, toBytes(encrypted.toString()), { headers: { 'Content-Type': "application/octet-stream" } })
-    return {data: res.data, credentials: encrypted.toString()}
-  } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      throw Error(e.response?.data)
-    }
-  }
+  const res = await axios.post(`${API_HOST}/auth/login?userId=${userId}`, toBytes(encrypted.toString()), { headers: { 'Content-Type': "application/octet-stream" } })
+  return {data: res.data, credentials: encrypted.toString()}
 }
 
 export async function loginWithCreds(userId: string, creds: string) {
-  try {
-    const res = await axios.post(`${API_HOST}/auth/login?userId=${userId}`, toBytes(creds.toString()), { headers: { 'Content-Type': "application/octet-stream" } })
-    return res.data
-  } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      throw Error(e.response?.data)
-    }
-  }
+  const res = await axios.post(`${API_HOST}/auth/login?userId=${userId}`, toBytes(creds.toString()), { headers: { 'Content-Type': "application/octet-stream" } })
+  return res.data
 }
 
 function toBytes(b64string: string) {

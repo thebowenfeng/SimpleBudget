@@ -51,7 +51,7 @@ export default function CreateBudgetDrawer(props: Props) {
   const user = useContext(FirebaseAuthContext);
   const db = app ? getFirestore(app) : undefined;
   const toast = useToast();
-  
+
   const categoryData = useMemo<CategoryType | undefined>(() => {
     if (props.categoryId != undefined) {
       for (const group of state) {
@@ -140,15 +140,13 @@ export default function CreateBudgetDrawer(props: Props) {
 
         editBudget(newData, props.categoryId, props.groupId, db, user, () => {
           showToast(toast, "Successfully edited budget category", "success");
-        }, () => {
-          // @ts-ignore
+        }, (error) => {
           showToast(toast, error.code, "error", error.message);
         })
       } else {
         addBudget(newData, props.groupId, db, user, () => {
           showToast(toast, "Successfully added budget category", "success");
         }, (error) => {
-          // @ts-ignore
           showToast(toast, error.code, "error", error.message);
         })
       }

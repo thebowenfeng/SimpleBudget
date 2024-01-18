@@ -1,6 +1,10 @@
 import { Action, createActionsHook, createStateHook, createStore } from 'react-sweet-state'
 import { addDoc, collection, doc, Firestore, getDocs, query, updateDoc, where, deleteField } from 'firebase/firestore'
 import { loginWithCreds } from '../requests/auth.ts'
+import { UnifiedError } from '../utils/error.ts'
+import axios from 'axios'
+import { handleAxiosError } from '../requests/config.ts'
+import { FirebaseError } from '@firebase/util'
 
 interface Transaction {
   id: string,
@@ -21,7 +25,7 @@ export type BankState = {loading: boolean, state: Account | null}
 export type BankActions = typeof actions
 
 export const actions = {
-  setAccount: (db: Firestore, userId: string, account: Account, creds: string | undefined, onSuccess: () => void, onError: (error: never) => void): Action<BankState> => async ({setState}) => {
+  setAccount: (db: Firestore, userId: string, account: Account, creds: string | undefined, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BankState> => async ({setState}) => {
     setState({loading: true, state: null})
     try {
       const accountSnapshot = await getDocs(query(collection(db, userId),
@@ -68,12 +72,16 @@ export const actions = {
         }
       })
       onSuccess()
-    } catch (e) {
+    } catch (e: unknown) {
       setState({loading: false, state: null})
-      onError(e as never)
+      if (e instanceof FirebaseError) {
+        onError(new UnifiedError(e.code, e.message))
+      } else {
+        onError(new UnifiedError("Error", (e as Error).message))
+      }
     }
   },
-  loadFirstAccount: (db: Firestore, userId: string, onSuccess: () => void, onError: (error: never) => void): Action<BankState> => async ({getState, setState}) => {
+  loadFirstAccount: (db: Firestore, userId: string, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BankState> => async ({getState, setState}) => {
     if (getState().state == null) {
       setState({loading: true, state: null})
       try {
@@ -117,9 +125,15 @@ export const actions = {
           }
         }
         setState({loading: false, state: null})
-      } catch (e) {
+      } catch (e: unknown) {
         setState({loading: false, state: null})
-        onError(e as never)
+        if (axios.isAxiosError(e)) {
+          onError(handleAxiosError(e))
+        } else if (e instanceof FirebaseError) {
+          onError(new UnifiedError(e.code, e.message))
+        } else {
+          onError(new UnifiedError("Error", (e as Error).message))
+        }
       }
     }
   }

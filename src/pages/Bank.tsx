@@ -64,7 +64,6 @@ export default function Bank() {
     loadFirstAccount(db as Firestore, user?.uid as string, () => {
       showToast(toast, "Success", "success", "Successfully loaded bank account")
     }, (e) => {
-      // @ts-ignore
       showToast(toast, e.code, "error", e.message)
     })
   }, [db, loadFirstAccount, toast, user?.uid])

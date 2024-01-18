@@ -2,6 +2,8 @@ import { Action, createActionsHook, createStateHook, createStore } from 'react-s
 import '../components/BudgetSpreadsheet/Animation.css'
 import { Firestore, addDoc, collection, doc, deleteDoc, getDocs, query, where, updateDoc, arrayUnion } from 'firebase/firestore'
 import { User } from 'firebase/auth'
+import { UnifiedError } from '../utils/error.ts'
+import { FirebaseError } from "@firebase/util"
 
 interface MonthlyData {
   month: number,
@@ -60,7 +62,7 @@ const initialState: BudgetState = {
 }
 
 export const actions = {
-  loadBudget: (db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> => ({setState}) => {
+  loadBudget: (db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> => ({setState}) => {
     setState({state: [], loading: true})
     getDocs(query(collection(db, user.uid), where("recordType", "==", "group"))).then(async (snapshot) => {
       const newData: GroupType[] = []
@@ -85,9 +87,12 @@ export const actions = {
               }
             })
           });
-          // eslint-disable-next-line
-        } catch (e: any) {
-          onError(e as never);
+        } catch (e: unknown) {
+          if (e instanceof FirebaseError) {
+            onError(new UnifiedError(e.code, e.message))
+          } else {
+            onError(new UnifiedError("Error", (e as Error).message));
+          }
           setState({ state: [], loading: false })
           return;
         }
@@ -95,8 +100,8 @@ export const actions = {
 
       onSuccess();
       setState({ state: newData, loading: false })
-    }).catch((error) => {
-      onError(error as never);
+    }).catch((error: FirebaseError) => {
+      onError(new UnifiedError(error.code, error.message));
     })
   },
   swapGroup: (item1: GroupType, item2: GroupType): Action<BudgetState> =>
@@ -125,7 +130,7 @@ export const actions = {
         setState({ state: newState })
       }
     },
-  addGroup: (title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  addGroup: (title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const currState = [...getState().state]
       const tempId = randId();
@@ -143,13 +148,13 @@ export const actions = {
         curr[getIndex(tempId, curr)].id = obj.id
         setState({state: curr});
         onSuccess();
-      }).catch((error) => {
+      }).catch((error: FirebaseError) => {
         const newState = [...getState().state].filter((obj) => obj.id != tempId)
         setState({state: newState})
-        onError(error as never);
+        onError(new UnifiedError(error.code, error.message));
       })
     },
-  removeGroup: (groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  removeGroup: (groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({getState, setState}) => {
       const currState = [...getState().state];
       const removedObj = currState.filter((obj) => obj.id == groupId)[0];
@@ -158,12 +163,12 @@ export const actions = {
 
       deleteDoc(doc(db, user.uid, groupId)).then(() => {
         onSuccess();
-      }).catch((error) => {
-        onError(error as never);
+      }).catch((error: FirebaseError) => {
+        onError(new UnifiedError(error.code, error.message));
         setState({state: [...getState().state, removedObj]})
       })
     },
-  modifyGroup: (groupId: string, title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  modifyGroup: (groupId: string, title: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const ind = getIndex(groupId, getState().state);
       const oldTitle = getState().state[ind].title;
@@ -172,13 +177,13 @@ export const actions = {
 
       updateDoc(doc(db, user.uid, groupId), { title: title }).then(() => {
         onSuccess();
-      }).catch((error) => {
+      }).catch((error: FirebaseError) => {
         getState().state[ind].title = oldTitle;
         setState({state: [...getState().state]});
-        onError(error as never);
+        onError(new UnifiedError(error.code, error.message));
       })
     },
-  addBudget: (budget: CategoryType, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  addBudget: (budget: CategoryType, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const groupObj = findObj(groupId, getState().state);
       if (groupObj) {
@@ -193,8 +198,8 @@ export const actions = {
           const categoryIndex = getIndex(budget.id, groupObj.children);
           groupObj.children[categoryIndex].id = docRef.id;
           setState({state: [...getState().state]});
-        }).catch((error) => {
-          onError(error as never);
+        }).catch((error: FirebaseError) => {
+          onError(new UnifiedError(error.code, error.message));
           groupObj.children = groupObj.children.filter((obj) => obj.id != budget.id);
           setState({state: [...getState().state]})
         })
@@ -202,7 +207,7 @@ export const actions = {
         onError({code: "Invalid group", message: "Cannot find group"} as never);
       }
     },
-  deleteBudget: (budgetId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  deleteBudget: (budgetId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const newState = [...getState().state];
       let groupObj: GroupType | undefined = undefined;
@@ -223,15 +228,15 @@ export const actions = {
 
         deleteDoc(doc(db, user.uid, groupObj.id, "categories", budgetId)).then(() => {
           onSuccess();
-        }).catch((error) => {
-          onError(error as never);
+        }).catch((error: FirebaseError) => {
+          onError(new UnifiedError(error.code, error.message));
           const newGroupObj = getState().state.filter((obj) => obj.id == groupObj?.id)[0];
           newGroupObj.children.splice(budgetInd, 0, budgetObj);
           setState({state: [...getState().state]})
         })
       }
     },
-  addDefaultMonthlyData: (month: number, year: number, db: Firestore, user: User, onError: (error: never) => void): Action<BudgetState> =>
+  addDefaultMonthlyData: (month: number, year: number, db: Firestore, user: User, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const newState = [...getState().state];
       for (const group of newState) {
@@ -253,8 +258,8 @@ export const actions = {
             setState({state: newState});
 
             updateDoc(doc(db, user.uid, group.id, "categories", budget.id),
-              {data: arrayUnion({month: month, year: year, assigned: 0, available: prevAvail})}).catch((error) => {
-              onError(error as never);
+              {data: arrayUnion({month: month, year: year, assigned: 0, available: prevAvail})}).catch((error: FirebaseError) => {
+              onError(new UnifiedError(error.code, error.message));
               budget.data = budget.data.filter((obj) => !(obj.month == month && obj.year == year));
               setState({state: [...newState]});
             })
@@ -262,7 +267,7 @@ export const actions = {
         }
       }
     },
-  editBudget: (data: CategoryType, categoryId: string, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: never) => void): Action<BudgetState> =>
+  editBudget: (data: CategoryType, categoryId: string, groupId: string, db: Firestore, user: User, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BudgetState> =>
     ({setState, getState}) => {
       const newState = [...getState().state];
       const group = newState.filter((obj) => obj.id == groupId)[0];
@@ -280,8 +285,8 @@ export const actions = {
         data: data.data
       }).then(() => {
         onSuccess();
-      }).catch((error) => {
-        onError(error as never);
+      }).catch((error: FirebaseError) => {
+        onError(new UnifiedError(error.code, error.message));
         group.children.splice(ind, 1, oldCategory);
         setState({state: [...newState]});
       })

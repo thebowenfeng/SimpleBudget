@@ -40,7 +40,6 @@ export default function DeleteBudgetPopover(props: Props) {
       deleteBudget(props.id, db, user, () => {
         showToast(toast, "Successfully deleted budget", "success");
       }, (error) => {
-        // @ts-ignore
         showToast(toast, error.code, "error", error.message);
       })
     }

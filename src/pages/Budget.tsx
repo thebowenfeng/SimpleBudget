@@ -55,7 +55,6 @@ export default function Budget() {
       loadBudget(db, user, () => {
         showToast(toast, "Successfully loaded data", "success");
       }, (error) => {
-        // @ts-ignore
         showToast(toast, error.code, "error", error.message)
       })
     }
@@ -65,7 +64,6 @@ export default function Budget() {
   useEffect(() => {
     if (user && db) {
       addDefaultMonthlyData(month, year, db, user, (error) => {
-        // @ts-ignore
         showToast(toast, error.code, "error", error.message)
       })
     }

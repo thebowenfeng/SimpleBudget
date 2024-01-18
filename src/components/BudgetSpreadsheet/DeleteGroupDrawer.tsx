@@ -50,7 +50,7 @@ export default function DeleteGroupDrawer(props: Props) {
       const toRemove = state.filter((obj) => obj.id == inputRef.current?.value)[0];
       removeGroup(toRemove.id, db, user,
         () => {showToast(toast,"Successfully deleted group", "success")},
-        (error) => { // @ts-ignore
+        (error) => {
           showToast(toast, error.code, "error", error.message)});
     }
     props.onClose();

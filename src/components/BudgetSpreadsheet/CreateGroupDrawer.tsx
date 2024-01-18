@@ -50,7 +50,6 @@ export default function CreateGroupDrawer (props: Props) {
 
       const name = inputRef.current?.value;
       addGroup(name, db, user, () => {showToast(toast,"Group added", "success")}, (error) => {
-        // @ts-ignore
         showToast(toast, error.code, "error", error.message);
       });
 
@@ -68,7 +67,6 @@ export default function CreateGroupDrawer (props: Props) {
       modifyGroup(props.data?.id, inputRef.current.value, db, user, () => {
         showToast(toast, "Successfully edited group", "success")
       }, (error) => {
-        // @ts-ignore
         showToast(toast, error.code, "error", error.message);
       });
     }

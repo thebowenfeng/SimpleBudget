@@ -32,7 +32,6 @@ export default function Selection(props: Props) {
       setAccount(db, user.uid, { ...account, transactions: [] }, account.credentials, () => {
         showToast(toast, "Successfully linked bank account", "success")
       }, (e) => {
-        // @ts-ignore
         showToast(toast, e.code, "error", e.message)
       })
     }
