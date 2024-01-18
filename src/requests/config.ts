@@ -5,7 +5,7 @@ export const API_HOST = import.meta.env.DEV ? "http://localhost:8080" : ""
 
 export function handleAxiosError(e: AxiosError) {
   if (e.response) {
-    return new UnifiedError(e.code as string, e.response.data as string)
+    return new UnifiedError(`${e.code as string} (Code: ${e.response.status})`, e.response.data as string)
   } else if (e.request) {
     return new UnifiedError(e.code as string, e.request)
   } else {
