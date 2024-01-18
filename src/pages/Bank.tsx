@@ -1,10 +1,15 @@
 import { styled } from 'styled-components'
 import { isMobile } from 'react-device-detect'
-import { Button } from '@chakra-ui/react'
+import { Button, useToast } from '@chakra-ui/react'
 import { getTheme } from '../themes/theme.ts'
 import BankInfo from '../components/BankInfo.tsx'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import BankLinkModal from '../components/BankLinkModal/BankLinkModal.tsx'
+import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
+import { FirebaseContext } from '../contexts/FirebaseContext.ts'
+import { Firestore, getFirestore } from 'firebase/firestore'
+import { useBankActions } from '../stores/bankStore.ts'
+import { showToast } from '../utils/toast.ts'
 
 const RootContainer = styled.div`
   display: flex;
@@ -49,6 +54,20 @@ export default function Bank() {
   }
 
   const [isLinkBankOpen, setIsLinkBankOpen] = useState<boolean>(false)
+  const user = useContext(FirebaseAuthContext);
+  const app = useContext(FirebaseContext);
+  const db = app ? getFirestore(app) : undefined;
+  const { loadFirstAccount } = useBankActions()
+  const toast = useToast()
+
+  useEffect(() => {
+    loadFirstAccount(db as Firestore, user?.uid as string, () => {
+      showToast(toast, "Success", "success", "Successfully loaded bank account")
+    }, (e) => {
+      // @ts-ignore
+      showToast(toast, e.code, "error", e.message)
+    })
+  }, [db, loadFirstAccount, toast, user?.uid])
 
   return (
     <RootContainer>

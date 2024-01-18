@@ -1,5 +1,5 @@
 import {
-  Button,
+  Button, Checkbox,
   Input,
   InputGroup,
   InputRightElement,
@@ -25,6 +25,7 @@ export default function Login(props: Props) {
   const passwordRef = useRef<HTMLInputElement>(null);
   const toast = useToast()
   const [loading, setLoading] = useState<boolean>(false);
+  const [save, setSave] = useState<boolean>(false);
 
   const handleLogin = async () => {
     try {
@@ -33,7 +34,9 @@ export default function Login(props: Props) {
         usernameRef.current?.value as string, passwordRef.current?.value as string);
       setLoading(false);
       // @ts-ignore
-      props.onSuccess(resData.map((obj) => {return {id: obj.accountNumber, name: obj.name, balance: obj.funds}}))
+      props.onSuccess(resData.data.map((obj) => {
+        return {id: obj.accountNumber, name: obj.name, balance: obj.funds, credentials: save ? resData?.credentials : undefined}
+      }))
     } catch (e: any) { // eslint-disable-line
       setLoading(false);
       showToast(toast, "Server error", "error", e.message)
@@ -70,6 +73,7 @@ export default function Login(props: Props) {
           </Button>
         </InputRightElement>
       </InputGroup>
+      <Checkbox onChange={(e) => setSave(e.target.checked)}>Save password</Checkbox>
       <Loadable isLoading={loading}>
         <Button size={"lg"}
                 sx={{

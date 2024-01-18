@@ -20,7 +20,8 @@ interface Props {
 export interface Account {
   id: string,
   name: string,
-  balance: number
+  balance: number,
+  credentials?: string
 }
 
 const InputFields = styled.div`

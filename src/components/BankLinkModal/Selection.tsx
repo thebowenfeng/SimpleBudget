@@ -29,7 +29,7 @@ export default function Selection(props: Props) {
 
     const account = props.accounts.filter((obj) => obj.id == inputRef.current?.value)[0]
     if (db && user) {
-      setAccount(db, user.uid, { ...account, transactions: [] }, () => {
+      setAccount(db, user.uid, { ...account, transactions: [] }, account.credentials, () => {
         showToast(toast, "Successfully linked bank account", "success")
       }, (e) => {
         // @ts-ignore
