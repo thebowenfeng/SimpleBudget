@@ -8,8 +8,9 @@ import BankLinkModal from '../components/BankLinkModal/BankLinkModal.tsx'
 import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
 import { FirebaseContext } from '../contexts/FirebaseContext.ts'
 import { Firestore, getFirestore } from 'firebase/firestore'
-import { useBankActions } from '../stores/bankStore.ts'
+import { useBankActions, useBankState } from '../stores/bankStore.ts'
 import { showToast } from '../utils/toast.ts'
+import { handleError, registerCallback } from '../requests/transactions.ts'
 
 const RootContainer = styled.div`
   display: flex;
@@ -57,7 +58,8 @@ export default function Bank() {
   const user = useContext(FirebaseAuthContext);
   const app = useContext(FirebaseContext);
   const db = app ? getFirestore(app) : undefined;
-  const { loadFirstAccount } = useBankActions()
+  const bankState = useBankState()
+  const { loadFirstAccount, addTransaction } = useBankActions()
   const toast = useToast()
 
   useEffect(() => {
@@ -66,7 +68,34 @@ export default function Bank() {
     }, (e) => {
       showToast(toast, e.code, "error", e.message)
     })
-  }, [db, loadFirstAccount, toast, user?.uid])
+    // eslint-disable-next-line
+  }, [])
+
+  useEffect(() => {
+    if (bankState.state != null) {
+      registerCallback((data) => {
+        // Fix timestamp
+        data.created.setHours(new Date().getHours())
+        data.created.setMinutes(new Date().getMinutes())
+        data.created.setSeconds(new Date().getSeconds())
+
+        addTransaction(db as Firestore, user?.uid as string, {
+          id: data.id,
+          description: data.description,
+          timestamp: data.created,
+          amount: data.amount,
+          category: "undefined"
+        }, () => void 0, (e) => {
+          showToast(toast, e.code, "error", e.message)
+        })
+      })
+
+      handleError((err) => {
+        showToast(toast, err.code, "error", err.message)
+      })
+    }
+    // eslint-disable-next-line
+  }, [bankState.state])
 
   return (
     <RootContainer>

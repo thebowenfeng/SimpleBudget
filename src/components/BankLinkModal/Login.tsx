@@ -38,7 +38,7 @@ export default function Login(props: Props) {
       setLoading(false);
       // @ts-ignore
       props.onSuccess(resData.data.map((obj) => {
-        return {id: obj.accountNumber, name: obj.name, balance: obj.funds, credentials: save ? resData?.credentials : undefined}
+        return {id: obj.accountNumber, name: obj.name, balance: obj.balance, credentials: save ? resData?.credentials : undefined}
       }))
     } catch (e: unknown) {
       setLoading(false);
