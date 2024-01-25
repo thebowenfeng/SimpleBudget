@@ -59,17 +59,8 @@ export default function Bank() {
   const app = useContext(FirebaseContext);
   const db = app ? getFirestore(app) : undefined;
   const bankState = useBankState()
-  const { loadFirstAccount, addTransaction } = useBankActions()
+  const { addTransaction } = useBankActions()
   const toast = useToast()
-
-  useEffect(() => {
-    loadFirstAccount(db as Firestore, user?.uid as string, () => {
-      showToast(toast, "Success", "success", "Successfully loaded bank account")
-    }, (e) => {
-      showToast(toast, e.code, "error", e.message)
-    })
-    // eslint-disable-next-line
-  }, [])
 
   useEffect(() => {
     if (bankState.state != null) {

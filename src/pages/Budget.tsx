@@ -4,11 +4,12 @@ import { isMobile } from 'react-device-detect'
 import BudgetSpreadsheetView from '../components/BudgetSpreadsheet/BudgetSpreadsheetView.tsx'
 import { useBudgetActions, useBudgetState } from '../stores/budgetStore.ts'
 import { useContext, useEffect, useState } from 'react'
-import { getFirestore } from 'firebase/firestore'
+import { Firestore, getFirestore } from 'firebase/firestore'
 import { FirebaseContext } from '../contexts/FirebaseContext.ts'
 import { FirebaseAuthContext } from '../contexts/FirebaseAuthContext.ts'
 import { useToast } from '@chakra-ui/react'
 import { showToast } from '../utils/toast.ts'
+import { useBankActions } from '../stores/bankStore.ts'
 
 const RootContainer = styled.div`
   display: flex;
@@ -43,6 +44,7 @@ const Body = styled.div`
 export default function Budget() {
   const budgetState = useBudgetState();
   const { loadBudget, addDefaultMonthlyData } = useBudgetActions();
+  const { loadFirstAccount } = useBankActions()
   const app = useContext(FirebaseContext);
   const user = useContext(FirebaseAuthContext);
   const db = app ? getFirestore(app) : undefined;
@@ -54,6 +56,12 @@ export default function Budget() {
     if (user && db && budgetState.state.length == 0) {
       loadBudget(db, user, () => {
         showToast(toast, "Successfully loaded data", "success");
+        // Pre-emptively attempts to load bank account
+        loadFirstAccount(db as Firestore, user?.uid as string, () => {
+          showToast(toast, "Success", "success", "Successfully loaded bank account")
+        }, (e) => {
+          showToast(toast, e.code, "error", e.message)
+        })
       }, (error) => {
         showToast(toast, error.code, "error", error.message)
       })

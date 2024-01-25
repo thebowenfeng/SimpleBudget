@@ -65,7 +65,7 @@ export const actions = {
         })
       }
 
-      const lastTransnId = transactions.length > 0 ? transactions[transactions.length - 1].id : undefined
+      const lastTransnId = transactions.length > 0 ? transactions.map((obj) => obj.id) : undefined
       newConnection(userId, account.id, lastTransnId)
 
       setState({
@@ -115,8 +115,7 @@ export const actions = {
               return 0
             })
 
-            const lastTransnId = transactions.length > 0 ? transactions[transactions.length - 1].id : undefined
-            console.log(transactions)
+            const lastTransnId = transactions.length > 0 ? transactions.map((obj) => obj.id) : undefined
             newConnection(userId, account.accountNumber, lastTransnId)
 
             setState({
