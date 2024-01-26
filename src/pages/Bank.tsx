@@ -11,6 +11,7 @@ import { Firestore, getFirestore } from 'firebase/firestore'
 import { useBankActions, useBankState } from '../stores/bankStore.ts'
 import { showToast } from '../utils/toast.ts'
 import { handleError, registerCallback } from '../requests/transactions.ts'
+import TransactionSpreadsheetView from '../components/TransactionSpreadsheet/TransactionSpreadsheetView.tsx'
 
 const RootContainer = styled.div`
   display: flex;
@@ -75,7 +76,8 @@ export default function Bank() {
           description: data.description,
           timestamp: data.created,
           amount: data.amount,
-          category: "undefined"
+          category: "undefined",
+          firebaseId: ""
         }, () => void 0, (e) => {
           showToast(toast, e.code, "error", e.message)
         })
@@ -97,6 +99,7 @@ export default function Bank() {
         </RightContainer>
       </Header>
       <BankLinkModal isOpen={isLinkBankOpen} onClose={() => setIsLinkBankOpen(false)} />
+      <TransactionSpreadsheetView />
     </RootContainer>
   )
 }

@@ -7,23 +7,44 @@ import { handleAxiosError } from '../requests/config.ts'
 import { FirebaseError } from '@firebase/util'
 import { newConnection } from '../requests/transactions.ts'
 
-interface Transaction {
+export interface Transaction {
   id: string,
   description: string,
   timestamp: Date,
   amount: number,
-  category: string
+  category: string,
+  firebaseId: string,
 }
 
 interface Account {
   name: string,
   balance: number,
   id: string,
+  firebaseId: string,
   transactions: Transaction[]
 }
 
 export type BankState = {loading: boolean, state: Account | null}
 export type BankActions = typeof actions
+
+function isUndefinedOrEmpty(str: string): boolean {
+  return (str === "" || str == undefined)
+}
+
+function sortTransaction(a: Transaction, b: Transaction) {
+  if (isUndefinedOrEmpty(a.category) && !isUndefinedOrEmpty(b.category)) {
+    return -1
+  } else if (!isUndefinedOrEmpty(a.category) && isUndefinedOrEmpty(b.category)) {
+    return 1
+  } else {
+    if (a.timestamp < b.timestamp) {
+      return 1
+    } else if (a.timestamp > b.timestamp) {
+      return -1
+    }
+  }
+  return 0
+}
 
 export const actions = {
   setAccount: (db: Firestore, userId: string, account: Account, creds: string | undefined, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BankState> => async ({getState, setState}) => {
@@ -33,9 +54,12 @@ export const actions = {
         where("recordType", "==", "bankAccount"), where("id", "==", account.id)))
 
       let transactions: Transaction[] = []
+      let docId = ""
       if (!accountSnapshot.empty) {
         // Update password preferences
-        await updateDoc(doc(db, userId, accountSnapshot.docs[0].id), {
+        const docRef = doc(db, userId, accountSnapshot.docs[0].id)
+        docId = docRef.id
+        await updateDoc(docRef, {
           credentials: creds != undefined ? creds : deleteField()
         })
 
@@ -46,23 +70,18 @@ export const actions = {
             description: obj.data()["description"],
             timestamp: obj.data()["timestamp"].toDate(),
             amount: parseFloat(obj.data()["amount"]),
-            category: ""
+            category: obj.data()["category"],
+            firebaseId: obj.id
           }
         })
-        transactions.sort((a, b) => {
-          if (a.timestamp < b.timestamp) {
-            return -1
-          } else if (a.timestamp > b.timestamp) {
-            return 1
-          }
-          return 0
-        })
+        transactions.sort(sortTransaction)
       } else {
-        await addDoc(collection(db, userId), {
+        const docRef = await addDoc(collection(db, userId), {
           recordType: "bankAccount",
           id: account.id,
           ...(creds != undefined && {credentials: creds})
         })
+        docId = docRef.id
       }
 
       const lastTransnId = transactions.length > 0 ? transactions.map((obj) => obj.id) : undefined
@@ -72,6 +91,7 @@ export const actions = {
         loading: false,
         state: {
           ...account,
+          firebaseId: docId,
           transactions: transactions
         }
       })
@@ -103,17 +123,11 @@ export const actions = {
                 description: obj.data()["description"],
                 timestamp: obj.data()["timestamp"].toDate(),
                 amount: parseFloat(obj.data()["amount"]),
-                category: ""
+                category: obj.data()["category"],
+                firebaseId: obj.id
               }
             })
-            transactions.sort((a, b) => {
-              if (a.timestamp < b.timestamp) {
-                return -1
-              } else if (a.timestamp > b.timestamp) {
-                return 1
-              }
-              return 0
-            })
+            transactions.sort(sortTransaction)
 
             const lastTransnId = transactions.length > 0 ? transactions.map((obj) => obj.id) : undefined
             newConnection(userId, account.accountNumber, lastTransnId)
@@ -124,7 +138,8 @@ export const actions = {
                 name: account.name,
                 balance: account.balance,
                 id: account.accountNumber,
-                transactions: transactions
+                transactions: transactions,
+                firebaseId: doc.id
               }
             })
             onSuccess()
@@ -148,7 +163,7 @@ export const actions = {
     const oldState = getState()
     if (oldState.state != null && !oldState.loading) {
       try {
-        const newTransactions = [...oldState.state.transactions, transaction]
+        const newTransactions = [transaction, ...oldState.state.transactions]
         setState({
           loading: false,
           state: {
@@ -161,12 +176,13 @@ export const actions = {
           where("recordType", "==", "bankAccount"),
           where("id", "==", oldState.state.id)))).docs[0].id
 
-        await addDoc(collection(db, userId, docId, "transactions"), {
+        const docRef = await addDoc(collection(db, userId, docId, "transactions"), {
           id: transaction.id,
           description: transaction.description,
           timestamp: transaction.timestamp,
           amount: transaction.amount,
         })
+        transaction.id = docRef.id
         onSuccess()
       } catch (e) {
         const reverted = getState().state?.transactions.filter((obj) => obj.id != transaction.id)
@@ -184,6 +200,46 @@ export const actions = {
           onError(new UnifiedError("Error", (e as Error).message))
         }
       }
+    }
+  },
+  editCategory: (db: Firestore, userId: string, transactionId: string, categoryId: string, onSuccess: () => void, onError: (error: UnifiedError) => void): Action<BankState> => async ({getState, setState}) => {
+    const transaction = getState().state?.transactions.find((obj) => obj.id == transactionId)
+    const oldState = getState().state
+    if (transaction && oldState) {
+      const newTransactions = [...oldState.transactions]
+      const oldCategory = transaction.category
+      transaction.category = categoryId
+      newTransactions.sort(sortTransaction)
+      setState({
+        loading: getState().loading,
+        state: {
+          ...oldState,
+          transactions: newTransactions
+        }
+      })
+      try {
+        await updateDoc(doc(db, userId, getState().state?.firebaseId as string, "transactions", transaction.firebaseId), {
+          category: categoryId
+        })
+        onSuccess()
+      } catch (e) {
+        transaction.category = oldCategory
+        oldState.transactions.sort(sortTransaction)
+        setState({
+          loading: getState().loading,
+          state: {
+            ...oldState,
+            transactions: oldState.transactions
+          }
+        })
+        if (e instanceof FirebaseError) {
+          onError(new UnifiedError(e.code, e.message))
+        } else {
+          onError(new UnifiedError("Error", (e as Error).message))
+        }
+      }
+    } else {
+      onError(new UnifiedError("Transaction Error", "Invalid ID when modifying group"))
     }
   }
 }
