@@ -66,7 +66,6 @@ function CategorySelection(props: {id: string, categoryId?: string}) {
   return (
     <Select placeholder={"Select category"} size={"sm"} borderRadius={"10px"}
             defaultValue={props.categoryId} onChange={(e) => {
-              console.log(props.categoryId)
               editCategory(db as Firestore, user?.uid as string, props.id, e.target.value, () => {
                 showToast(toast, "Success", "success", "Successfully changed category")
               }, (err) => {
